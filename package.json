@@ -1,0 +1,26 @@
+{
+  "name": "bilibili-notify-telegram-bot",
+  "version": "0.1.0",
+  "description": "",
+  "main": "main.js",
+  "dependencies": {
+    "axios": "^0.18.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MamoruDS/bilibili-notify-telegram-bot.git"
+  },
+  "keywords": [
+    "bilibili"
+  ],
+  "author": "MamoruDS",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MamoruDS/bilibili-notify-telegram-bot/issues"
+  },
+  "homepage": "https://github.com/MamoruDS/bilibili-notify-telegram-bot#readme"
+}
