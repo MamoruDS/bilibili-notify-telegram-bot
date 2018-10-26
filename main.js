@@ -144,14 +144,18 @@ function getTagA(url, value) {
     return `<a href="${url}">${value}</a>`
 }
 
-// function dynamicInfoParser(d_info) {
-//     let re = /\#.{1,}?#/g
-//     let links = d_info.match(re)
-//     let d_info_str = d_info.replace(re, '')
-//     for (let i = 0; i < links.length; i++) {
-//         d_info_str += getTagA()
-//     }
-// }
+function dynamicInfoParser(d_info) {
+    let re = /\#.{1,}?#/g
+    let links = d_info.match(re)
+    let d_info_str = d_info
+    if (links !== null) {
+        d_info_str = d_info.replace(re, '')
+        for (let i = 0; i < links.length; i++) {
+            d_info_str += getTagA(getBilibiliTagUrl(links[i]), links[i])
+        }
+    }
+    return d_info_str
+}
 
 // var j = schedule.scheduleJob('30 * * * * *', function () {
 let user_info = conf['user_info']
