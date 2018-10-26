@@ -66,6 +66,13 @@ function getNotification(cookies, type) {
     return data
 }
 
+function cardParse(card) {
+    card = card.replace(new RegExp('\\\\', 'g'), '')
+    card = card.replace(new RegExp('\\"', 'g'), '"')
+    card = JSON.parse(card)
+    return card
+}
+
 // var j = schedule.scheduleJob('30 * * * * *', function () {
     // console.log(Date.now())
     let user_info = conf['user_info']
@@ -74,7 +81,8 @@ function getNotification(cookies, type) {
         user_notify = user_info[user].notify
         user_last_notify_ts = user_info[user].notify_ts
         for (let i = 0; i < user_notify.length; i++) {
-            getNotification(user_cookie, user_notify[i])
+            let res_data = getNotification(user_cookie, user_notify[i])
+            let notis = getLastNotis(res_data.data.cards, user_last_notify_ts[i])
         }
     }
 // })
