@@ -6,7 +6,7 @@ let conf = undefined
 
 if (fs.existsSync('conf.json')) {
     conf = readConf()
-    writeConf(conf)
+    // writeConf(conf)
 } else {
     writeConf()
 }
@@ -44,6 +44,7 @@ function writeConf(data) {
 }
 
 function getNotification(cookies, type) {
+    let data = {}
     axios.request('https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/dynamic_new', {
             // timeout: 1000,
             params: {
@@ -56,13 +57,24 @@ function getNotification(cookies, type) {
             proxy: false
         })
         .then(function (res) {
-            console.log(res.data)
+            data = res.data
+            console.log('success')
         })
         .catch(function (err) {
             console.log(err)
         })
+    return data
 }
 
-var j = schedule.scheduleJob('30 * * * * *', function () {
-    console.log(Date.now())
-})
+// var j = schedule.scheduleJob('30 * * * * *', function () {
+    // console.log(Date.now())
+    let user_info = conf['user_info']
+    for (user in user_info) {
+        user_cookie = user_info[user].cookie
+        user_notify = user_info[user].notify
+        user_last_notify_ts = user_info[user].notify_ts
+        for (let i = 0; i < user_notify.length; i++) {
+            getNotification(user_cookie, user_notify[i])
+        }
+    }
+// })
