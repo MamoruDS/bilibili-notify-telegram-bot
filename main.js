@@ -43,6 +43,26 @@ function writeConf(data) {
     fs.writeFileSync('conf.json', data, 'utf8')
 }
 
+function getNotification(cookies, type) {
+    axios.request('https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/dynamic_new', {
+            // timeout: 1000,
+            params: {
+                uid: 0,
+                type: type,
+            },
+            headers: {
+                Cookie: cookies,
+            },
+            proxy: false
+        })
+        .then(function (res) {
+            console.log(res.data)
+        })
+        .catch(function (err) {
+            console.log(err)
+        })
+}
+
 var j = schedule.scheduleJob('30 * * * * *', function () {
     console.log(Date.now())
 })
