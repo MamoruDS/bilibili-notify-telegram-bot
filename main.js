@@ -43,7 +43,7 @@ function writeConf(data) {
     fs.writeFileSync('conf.json', data, 'utf8')
 }
 
-function getNotification(cookies, type) {
+function getNotification(user, cookies, type, ts) {
     let data = {}
     axios.request('https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/dynamic_new', {
             // timeout: 1000,
@@ -58,12 +58,45 @@ function getNotification(cookies, type) {
         })
         .then(function (res) {
             data = res.data
-            console.log('success')
+            // console.log('success')
+            // console.log(data.data.cards)
+
+            // getLastNotis(user, data.data.cards, type, ts)
         })
         .catch(function (err) {
             console.log(err)
         })
+        .then(function () {
+            getLastNotis(user, data.data.cards, type, ts)
+        })
     return data
+}
+
+function getLastNotis(chat_id, cards, notify_type, last_ts) {
+    for (let i = cards.length - 1; i >= 0; i--) {
+        let c_info = cards[i]
+        let c_desc = c_info.desc
+        let c_card = c_info.card
+        if (c_desc.timestamp > last_ts) {
+            // last_ts = c_desc.timestamp
+            let card_obj = cardParse(c_card)
+            let tg_method_obj = cardStylize(card_obj, notify_type)
+            tg_method_obj.chat_id = chat_id
+
+            // console.log(tg_method_obj)
+            axios.request(tg_bot_api + tg_method_obj.route, {
+                    params: tg_method_obj,
+                    proxy: false
+                })
+                .then(function (res) {
+                    console.log('success')
+                    // console.log(res.data)
+                })
+                .catch(function (err) {
+                    console.log(err)
+                })
+        }
+    }
 }
 
 function cardParse(card) {
@@ -73,16 +106,54 @@ function cardParse(card) {
     return card
 }
 
+function cardStylize(card_obj, notify_type) {
+    let tgm_obj = {
+        route: undefined,
+        text: '',
+        photo: '',
+        audio: '',
+        caption: '',
+        duration: 0,
+        performer: '',
+        title: '',
+        document: '',
+        thumb: '',
+        video: '',
+        animation: '',
+        width: '',
+        height: '',
+        supports_streaming: false,
+        parse_mode: 'HTML',
+    }
+    switch (notify_type) {
+        case "8":
+            let user_info = card_obj.user_profile.info
+            tgm_obj.route = '/sendPhoto'
+            tgm_obj.photo = card_obj.cover
+            break
+        case "512":
+            tgm_obj.route = '/sendPhoto'
+            tgm_obj.photo = card_obj.cover
+            tgm_obj.caption = '<b>[番剧更新]</b>\n' +
+                // '<b>' + card_obj.apiSeasonInfo.title + '</b>\n' +
+                '# ' + card_obj.apiSeasonInfo.title + '\n' +
+                '<b>第' + card_obj.index + '话</b> ' +
+                '<a href="' + card_obj.url + '">' + card_obj.index_title + '</a>'
+            tgm_obj.parse_mode = 'HTML'
+            break
+    }
+    return tgm_obj
+}
+
 // var j = schedule.scheduleJob('30 * * * * *', function () {
-    // console.log(Date.now())
-    let user_info = conf['user_info']
+let user_info = conf['user_info']
     for (user in user_info) {
         user_cookie = user_info[user].cookie
         user_notify = user_info[user].notify
         user_last_notify_ts = user_info[user].notify_ts
         for (let i = 0; i < user_notify.length; i++) {
-            let res_data = getNotification(user_cookie, user_notify[i])
-            let notis = getLastNotis(res_data.data.cards, user_last_notify_ts[i])
+            let res_data = getNotification(user, user_cookie, user_notify[i], user_last_notify_ts[i])
+            // let notis = getLastNotis(user, res_data.data.cards, user_notify[i], user_last_notify_ts[i])
         }
     }
 // })
