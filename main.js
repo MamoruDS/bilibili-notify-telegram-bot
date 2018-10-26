@@ -133,7 +133,7 @@ function cardStylize(card_obj, notify_type) {
 }
 
 function getBilibiliAidUrl(aid) {
-    return 'https://www.bilibili.com/video/av' + aid
+    return `https://www.bilibili.com/video/av${aid}`
 }
 
 function getBilibiliTagUrl(tagName) {
