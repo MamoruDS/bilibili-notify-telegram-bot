@@ -151,7 +151,8 @@ function dynamicInfoParser(d_info) {
     if (links !== null) {
         d_info_str = d_info.replace(re, '')
         for (let i = 0; i < links.length; i++) {
-            d_info_str += getTagA(getBilibiliTagUrl(links[i]), links[i])
+            let tagName = links[i].replace(/^\#/g, '@').replace('\#', '')
+            d_info_str += ' ' + getTagA(getBilibiliTagUrl(tagName.replace('@','')), tagName)
         }
     }
     return d_info_str
