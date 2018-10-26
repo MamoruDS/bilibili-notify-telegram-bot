@@ -13,22 +13,6 @@ if (fs.existsSync('conf.json')) {
 
 let tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
 
-// axios.request(tg_bot_api +
-//         '/sendMessage', {
-//             // timeout: 1000,
-//             params: {
-//                 chat_id: 1,
-//                 text: "https://www.bilibili.com/bangumi/play/ep251079",
-//             },
-//             proxy: false
-//         })
-//     .then(function (res) {
-//         console.log(res.data)
-//     })
-//     .catch(function (err) {
-//         console.log(err)
-//     })
-
 function readConf() {
     return JSON.parse(fs.readFileSync('conf.json', 'utf8'))
 }
@@ -60,8 +44,6 @@ function getNotification(user, cookies, type, ts) {
             data = res.data
             // console.log('success')
             // console.log(data.data.cards)
-
-            // getLastNotis(user, data.data.cards, type, ts)
         })
         .catch(function (err) {
             console.log(err)
@@ -135,7 +117,6 @@ function cardStylize(card_obj, notify_type) {
             tgm_obj.route = '/sendPhoto'
             tgm_obj.photo = card_obj.cover
             tgm_obj.caption = '<b>[番剧更新]</b>\n' +
-                // '<b>' + card_obj.apiSeasonInfo.title + '</b>\n' +
                 '# ' + card_obj.apiSeasonInfo.title + '\n' +
                 '<b>第' + card_obj.index + '话</b> ' +
                 '<a href="' + card_obj.url + '">' + card_obj.index_title + '</a>'
