@@ -109,9 +109,15 @@ function cardStylize(card_obj, notify_type) {
     }
     switch (notify_type) {
         case "8":
-            let user_info = card_obj.user_profile.info
             tgm_obj.route = '/sendPhoto'
-            tgm_obj.photo = card_obj.cover
+            tgm_obj.photo = card_obj.pic
+            tgm_obj.caption = '<b>[关注UP 投稿视频]</b>\n' +
+                '# ' + card_obj.owner.name + 
+                ' <b>投稿</b>：<a href="'+ getAidUrl(card_obj.aid) +'">'+ 
+                card_obj.title +'</a>\n' +
+                card_obj.desc + '\n' +
+                dynamicInfoParser(card_obj.dynamic)
+            tgm_obj.parse_mode = 'HTML'
             break
         case "512":
             tgm_obj.route = '/sendPhoto'
