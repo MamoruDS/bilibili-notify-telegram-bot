@@ -132,15 +132,19 @@ function cardStylize(card_obj, notify_type) {
     return tgm_obj
 }
 
+function getAidUrl(aid){
+    return 'https://www.bilibili.com/video/av' + aid
+}
+
 // var j = schedule.scheduleJob('30 * * * * *', function () {
 let user_info = conf['user_info']
-    for (user in user_info) {
-        user_cookie = user_info[user].cookie
-        user_notify = user_info[user].notify
-        user_last_notify_ts = user_info[user].notify_ts
-        for (let i = 0; i < user_notify.length; i++) {
-            let res_data = getNotification(user, user_cookie, user_notify[i], user_last_notify_ts[i])
-            // let notis = getLastNotis(user, res_data.data.cards, user_notify[i], user_last_notify_ts[i])
-        }
+for (user in user_info) {
+    user_cookie = user_info[user].cookie
+    user_notify = user_info[user].notify
+    user_last_notify_ts = user_info[user].notify_ts
+    for (let i = 0; i < user_notify.length; i++) {
+        let res_data = getNotification(user, user_cookie, user_notify[i], user_last_notify_ts[i])
+        // let notis = getLastNotis(user, res_data.data.cards, user_notify[i], user_last_notify_ts[i])
     }
+}
 // })
