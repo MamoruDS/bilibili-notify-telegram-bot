@@ -34,7 +34,7 @@ function updateUserNotiTS(user, type, ts) {
         ts = Math.round(Date.now() / 1000)
         conf.user_info[user].notify.push(type)
         conf.user_info[user].notify_ts.push(ts)
-    }else{
+    } else {
         conf.user_info[user].notify_ts[typeIndex] = ts
     }
     writeConf(conf)
@@ -77,7 +77,7 @@ function getLastNotis(chat_id, cards, notify_type, last_ts) {
             let card_obj = cardParse(c_card)
             let tg_method_obj = cardStylize(card_obj, notify_type)
             tg_method_obj.chat_id = chat_id
-            
+
             updateUserNotiTS(chat_id, notify_type, c_desc.timestamp)
             // console.log(tg_method_obj)
             axios.request(tg_bot_api + tg_method_obj.route, {
@@ -85,7 +85,7 @@ function getLastNotis(chat_id, cards, notify_type, last_ts) {
                     proxy: false
                 })
                 .then(function (res) {
-                    console.log('success')
+                    console.log(`${logDate()} sent to "${chat_id}"`)
                     // console.log(res.data)
                 })
                 .catch(function (err) {
@@ -93,6 +93,20 @@ function getLastNotis(chat_id, cards, notify_type, last_ts) {
                 })
         }
     }
+}
+
+function logDate() {
+    let event = new Date(Date.now());
+    let options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        'hour': 'numeric',
+        minute: 'numeric',
+        second: 'numeric'
+    };
+    return event.toLocaleDateString('zh-CN', options)
 }
 
 function cardParse(card) {
