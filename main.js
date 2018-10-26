@@ -27,6 +27,19 @@ function writeConf(data) {
     fs.writeFileSync('conf.json', data, 'utf8')
 }
 
+function updateUserNotiTS(user, type, ts) {
+    let typeSet = conf.user_info[user].notify
+    let typeIndex = typeSet.indexOf(type)
+    if (typeIndex === -1) {
+        ts = Math.round(Date.now() / 1000)
+        conf.user_info[user].notify.push(type)
+        conf.user_info[user].notify_ts.push(ts)
+    }else{
+        conf.user_info[user].notify_ts[typeIndex] = ts
+    }
+    writeConf(conf)
+}
+
 function getNotification(user, cookies, type, ts) {
     let data = {}
     axios.request('https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/dynamic_new', {
@@ -64,7 +77,8 @@ function getLastNotis(chat_id, cards, notify_type, last_ts) {
             let card_obj = cardParse(c_card)
             let tg_method_obj = cardStylize(card_obj, notify_type)
             tg_method_obj.chat_id = chat_id
-
+            
+            updateUserNotiTS(chat_id, notify_type, c_desc.timestamp)
             // console.log(tg_method_obj)
             axios.request(tg_bot_api + tg_method_obj.route, {
                     params: tg_method_obj,
@@ -152,7 +166,7 @@ function dynamicInfoParser(d_info) {
         d_info_str = d_info.replace(re, '')
         for (let i = 0; i < links.length; i++) {
             let tagName = links[i].replace(/^\#/g, '@').replace('\#', '')
-            d_info_str += ' ' + getTagA(getBilibiliTagUrl(tagName.replace('@','')), tagName)
+            d_info_str += ' ' + getTagA(getBilibiliTagUrl(tagName.replace('@', '')), tagName)
         }
     }
     return d_info_str
