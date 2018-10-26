@@ -112,10 +112,10 @@ function cardStylize(card_obj, notify_type) {
             tgm_obj.route = '/sendPhoto'
             tgm_obj.photo = card_obj.pic
             tgm_obj.caption = '<b>[关注UP 投稿视频]</b>\n' +
-                '# ' + card_obj.owner.name + 
-                ' <b>投稿</b>：<a href="'+ getAidUrl(card_obj.aid) +'">'+ 
-                card_obj.title +'</a>\n' +
-                card_obj.desc + '\n' +
+                '# ' + card_obj.owner.name +
+                ' <b>投稿</b>：<a href="' + getBilibiliAidUrl(card_obj.aid) + '">' +
+                card_obj.title + '</a>\n' +
+                '<i>' + card_obj.desc + '</i>\n' +
                 dynamicInfoParser(card_obj.dynamic)
             tgm_obj.parse_mode = 'HTML'
             break
@@ -132,9 +132,26 @@ function cardStylize(card_obj, notify_type) {
     return tgm_obj
 }
 
-function getAidUrl(aid){
+function getBilibiliAidUrl(aid) {
     return 'https://www.bilibili.com/video/av' + aid
 }
+
+function getBilibiliTagUrl(tagName) {
+    return `https://www.bilibili.com/tag/name/${tagName}/feed`
+}
+
+function getTagA(url, value) {
+    return `<a href="${url}">${value}</a>`
+}
+
+// function dynamicInfoParser(d_info) {
+//     let re = /\#.{1,}?#/g
+//     let links = d_info.match(re)
+//     let d_info_str = d_info.replace(re, '')
+//     for (let i = 0; i < links.length; i++) {
+//         d_info_str += getTagA()
+//     }
+// }
 
 // var j = schedule.scheduleJob('30 * * * * *', function () {
 let user_info = conf['user_info']
