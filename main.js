@@ -1,18 +1,43 @@
 const fs = require('fs')
+const axios = require('axios')
+
+let conf = undefined
 
 if (fs.existsSync('conf.json')) {
-    let user_info = readConf()
-    console.log(typeof user_info)
-    writeConf(user_info)
+    conf = readConf()
+    writeConf(conf)
 } else {
-    writeConf({})
+    writeConf()
 }
+
+let tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
+
+axios.request(tg_bot_api +
+        '/sendMessage', {
+            // timeout: 1000,
+            params: {
+                chat_id: 1,
+                text: "https://www.bilibili.com/bangumi/play/ep251079",
+            },
+            proxy: false
+        })
+    .then(function (res) {
+        console.log(res.data)
+    })
+    .catch(function (err) {
+        console.log(err)
+    })
 
 function readConf() {
     return JSON.parse(fs.readFileSync('conf.json', 'utf8'))
 }
 
 function writeConf(data) {
+    if (!data) {
+        data = {
+            bot_token: undefined
+        }
+    }
     data = JSON.stringify(data)
     fs.writeFileSync('conf.json', data, 'utf8')
 }
