@@ -180,6 +180,14 @@ function getTagA(url, value) {
     return `<a href="${url}">${value}</a>`
 }
 
+function getTagBold(value) {
+    return `<b>${value}</b>`
+}
+
+function getTagItalic(value) {
+    return `<i>${value}</i>`
+}
+
 function dynamicInfoParser(d_info) {
     let re = /\#.{1,}?#/g
     let links = d_info.match(re)
