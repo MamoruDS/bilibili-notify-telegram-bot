@@ -203,15 +203,19 @@ function dynamicInfoParser(d_info) {
     return d_info_str
 }
 
-// var j = schedule.scheduleJob('30 * * * * *', function () {
-let user_info = conf['user_info']
-for (user in user_info) {
-    user_cookie = user_info[user].cookie
-    user_notify = user_info[user].notify
-    user_last_notify_ts = user_info[user].notify_ts
-    for (let i = 0; i < user_notify.length; i++) {
-        let res_data = getNotification(user, user_cookie, user_notify[i], user_last_notify_ts[i])
-        // let notis = getLastNotis(user, res_data.data.cards, user_notify[i], user_last_notify_ts[i])
+function notiCheck() {
+    let user_info = conf['user_info']
+    for (user in user_info) {
+        user_cookie = user_info[user].cookie
+        user_notify = user_info[user].notify
+        user_last_notify_ts = user_info[user].notify_ts
+        for (let i = 0; i < user_notify.length; i++) {
+            let res_data = getNotification(user, user_cookie, user_notify[i], user_last_notify_ts[i])
+            // let notis = getLastNotis(user, res_data.data.cards, user_notify[i], user_last_notify_ts[i])
+        }
     }
 }
+
+// var j = schedule.scheduleJob('30 * * * * *', function () {
+
 // })
