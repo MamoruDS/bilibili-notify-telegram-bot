@@ -147,6 +147,14 @@ function cardStylize(card_obj, notify_type) {
                 dynamicInfoParser(card_obj.dynamic)
             tgm_obj.parse_mode = 'HTML'
             break
+        case "16":
+            tgm_obj.route = '/sendVideo'
+            tgm_obj.video = card_obj.item.video_playurl
+            tgm_obj.duration = card_obj.item.video_time
+            tgm_obj.thumb = card_obj.item.cover.default
+            tgm_obj.caption = ''
+            tgm_obj.parse_mode = 'HTML'
+            break
         case "512":
             tgm_obj.route = '/sendPhoto'
             tgm_obj.photo = card_obj.cover
