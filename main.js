@@ -270,19 +270,19 @@ function notiCheck() {
 function updateCheck() {
     axios({
             baseURL: tg_bot_api,
-            route: '/getUpdates',
+            url: '/getUpdates',
             proxy: false,
             method: 'get'
         })
         .then(function (res) {
-            console.log(res.data)
+            // console.log(res.data)
             res_array = res.data.result
             for (let i = 0; i < res_array.length; i++) {
                 current_update_id = res_array[i].update_id
                 if (current_update_id > last_update_id) {
                     last_update_id = current_update_id
                     let res_single = res_array[i]
-                    let user = res_single.from.id
+                    let user = res_single.message.from.id
                     let update_text = res_single.message.text.split(' ')
                     switch (update_text[0]) {
                         case "/setCookie":
@@ -293,7 +293,7 @@ function updateCheck() {
             }
         })
         .catch(function (err) {
-            // console.log(err)
+            console.log(err)
         })
 }
 
