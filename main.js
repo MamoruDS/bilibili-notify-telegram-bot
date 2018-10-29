@@ -26,7 +26,7 @@ function writeConf(data) {
             update_id: 0,
             bot_token: undefined
         }
-        logGen('Default conf.json has been ganerated.', 'info')
+        logGen('default conf.json has been ganerated.', 'info')
     }
     data = JSON.stringify(data)
     fs.writeFileSync('conf.json', data, 'utf8')
@@ -74,10 +74,14 @@ function getNotification(user, cookies, type, ts) {
         .then(function (res) {
             data = res.data
             if (data.msg === 'error' || data.message === 'error') {
+                logGen(`'${user}' cookie info has expired.`, 'warn')
                 userCookieExpired(user)
             } else {
                 getLastNotis(user, data.data.cards, type, ts)
             }
+        })
+        .catch(function (err) {
+            logGen(`axios-error: http.status=${err.response.status}`, 'error')
         })
     return data
 }
@@ -102,6 +106,7 @@ function userCookieExpired(user) {
             })
             .then(function (res) {
                 // console.log(res)
+                logGen(`cookie expired info has been sent to '${user}'.`, 'info')
             })
             .catch(function (err) {
                 // console.log(err)
@@ -124,6 +129,7 @@ function userCookieUpdated(user) {
         })
         .then(function (res) {
             // console.log(res)
+            logGen(`cookie updated info has been sent to '${user}'.`, 'info')
         })
         .catch(function (err) {
             // console.log(err)
@@ -149,11 +155,11 @@ function getLastNotis(chat_id, cards, notify_type, last_ts) {
                     proxy: false
                 })
                 .then(function (res) {
-                    logGen(`sent to "${chat_id}"`, 'info')
+                    logGen(`notification has been sent to '${chat_id}'`, 'normal')
                     // console.log(res.data)
                 })
                 .catch(function (err) {
-                    console.log(err)
+                    // console.log(err)
                 })
         }
     }
@@ -163,22 +169,22 @@ function logGen(info, type) {
     let typeStr = ''
     switch (type) {
         case 'info':
-            typeStr = 'INFO'.green
+            typeStr = 'INFO'.green.bold
             break
         case 'normal':
-            typeStr = 'NORMAL'.cyan
+            typeStr = 'NORMAL'.cyan.bold
             break
         case 'user':
-            typeStr = 'USER'.blue
+            typeStr = 'USER'.blue.bold
             break
         case 'warn':
-            typeStr = 'WARN'.yellow
+            typeStr = 'WARN'.yellow.bold
             break
         case 'error':
-            typeStr = 'ERROR'.red
+            typeStr = 'ERROR'.red.bold
             break
         default:
-            typeStr = 'UNKNOWN'.grey
+            typeStr = 'UNKNOWN'.grey.bold
     }
     console.log(`[${typeStr}] ${moment().format('YY-MM-DD_HH:mm:ss_X').white} ${info.bold}`)
 }
@@ -312,6 +318,7 @@ function updateCheck(last_update_id) {
                     let update_text = res_single.message.text.split(' ')
                     switch (update_text[0]) {
                         case "/setCookie":
+                            logGen(`'${user}' has post a new cookie.`, 'user')
                             updateUserCookie(user, update_text[1])
                             userCookieUpdated(user)
                             break
@@ -321,7 +328,7 @@ function updateCheck(last_update_id) {
             updateLastUpdateId(last_update_id)
         })
         .catch(function (err) {
-            console.log(err)
+            // console.log(err)
         })
 }
 
