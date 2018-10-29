@@ -22,8 +22,11 @@ function readConf() {
 function writeConf(data) {
     if (!data) {
         data = {
+            user_info: {},
+            update_id: 0,
             bot_token: undefined
         }
+        logGen('Default conf.json has been ganerated.', 'info')
     }
     data = JSON.stringify(data)
     fs.writeFileSync('conf.json', data, 'utf8')
@@ -42,16 +45,17 @@ function updateLastUpdateId(update_id) {
 }
 
 function updateUserNotiTS(user, type, ts) {
-    let typeSet = conf.user_info[user].notify
+    let _conf = readConf()
+    let typeSet = _conf.user_info[user].notify
     let typeIndex = typeSet.indexOf(type)
     if (typeIndex === -1) {
         ts = Math.round(Date.now() / 1000)
-        conf.user_info[user].notify.push(type)
-        conf.user_info[user].notify_ts.push(ts)
+        _conf.user_info[user].notify.push(type)
+        _conf.user_info[user].notify_ts.push(ts)
     } else {
-        conf.user_info[user].notify_ts[typeIndex] = ts
+        _conf.user_info[user].notify_ts[typeIndex] = ts
     }
-    writeConf(conf)
+    writeConf(_conf)
 }
 
 function getNotification(user, cookies, type, ts) {
