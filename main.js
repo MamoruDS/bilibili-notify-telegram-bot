@@ -4,13 +4,6 @@ const schedule = require('node-schedule')
 const moment = require('moment')
 const colors = require('colors')
 
-colors.setTheme({
-    normal: 'cyan',
-    user: 'blue',
-    warn: 'yellow',
-    error: 'red'
-})
-
 let conf = undefined
 
 if (fs.existsSync('conf.json')) {
@@ -152,7 +145,7 @@ function getLastNotis(chat_id, cards, notify_type, last_ts) {
                     proxy: false
                 })
                 .then(function (res) {
-                    console.log(`${logDate()} sent to "${chat_id}"`)
+                    logGen(`sent to "${chat_id}"`, 'info')
                     // console.log(res.data)
                 })
                 .catch(function (err) {
@@ -163,16 +156,27 @@ function getLastNotis(chat_id, cards, notify_type, last_ts) {
 }
 
 function logGen(info, type) {
-    let logStr = `[${type}] ${moment().format('YY-MM-DD  ZZ X')}`
+    let typeStr = ''
     switch (type) {
+        case 'info':
+            typeStr = 'INFO'.green
+            break
+        case 'normal':
+            typeStr = 'NORMAL'.cyan
+            break
+        case 'user':
+            typeStr = 'USER'.blue
+            break
         case 'warn':
-            console.log(logStr.warn)
+            typeStr = 'WARN'.yellow
             break
         case 'error':
-            console.log(logStr.error)
+            typeStr = 'ERROR'.red
             break
+        default:
+            typeStr = 'UNKNOWN'.grey
     }
-    console.log()
+    console.log(`[${typeStr}] ${moment().format('YY-MM-DD_HH:mm:ss_X').white} ${info.bold}`)
 }
 
 function cardParse(card) {
@@ -325,3 +329,5 @@ let task = schedule.scheduleJob('*/10 * * * * *', function () {
     notiCheck()
     updateCheck(last_update_id)
 })
+
+logGen('bot started.', 'info')
