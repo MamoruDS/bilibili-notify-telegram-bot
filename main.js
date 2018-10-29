@@ -250,6 +250,39 @@ function notiCheck() {
     }
 }
 
+function updateCheck() {
+    conf = readConf()
+    last_update_id = conf.update_id
+    tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
+    axios({
+            baseURL: tg_bot_api,
+            route: '/getUpdates',
+            proxy: false,
+            method: 'get'
+        })
+        .then(function (res) {
+            console.log(res.data)
+            res_array = res.data.result
+            for (let i = 0; i < res_array.length; i++) {
+                current_update_id = res_array[i].update_id
+                if (current_update_id > last_update_id) {
+                    last_update_id = current_update_id
+                    let res_single = res_array[i]
+                    let user = res_single.from.id
+                    let update_text = res_single.message.text.split(' ')
+                    switch (update_text[0]) {
+                        case "/setCookie":
+                            updateUserCookie(user, update_text[1])
+                            break
+                    }
+                }
+            }
+        })
+        .catch(function (err) {
+            // console.log(err)
+        })
+}
+
 // var j = schedule.scheduleJob('30 * * * * *', function () {
 
 // })
