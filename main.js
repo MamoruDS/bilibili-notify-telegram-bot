@@ -220,10 +220,13 @@ function dynamicInfoParser(d_info) {
 function notiCheck() {
     conf = readConf()
     tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
-    
+
     let user_info = conf['user_info']
     for (user in user_info) {
         user_cookie = user_info[user].cookie
+        if (!user_cookie) {
+            continue
+        }
         user_notify = user_info[user].notify
         user_last_notify_ts = user_info[user].notify_ts
         for (let i = 0; i < user_notify.length; i++) {
