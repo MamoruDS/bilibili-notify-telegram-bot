@@ -1,6 +1,15 @@
 const fs = require('fs')
 const axios = require('axios')
 const schedule = require('node-schedule')
+const moment = require('moment')
+const colors = require('colors')
+
+colors.setTheme({
+    normal: 'cyan',
+    user: 'blue',
+    warn: 'yellow',
+    error: 'red'
+})
 
 let conf = undefined
 
@@ -78,28 +87,28 @@ function getNotification(user, cookies, type, ts) {
 
 function userCookieExpired(user) {
     let _conf = readConf()
-    if (_conf.user_info[user].cookie){
+    if (_conf.user_info[user].cookie) {
         updateUserCookie(user, undefined)
         axios({
-            baseURL: tg_bot_api,
-            url: '/sendMessage',
-            params: {
-                chat_id: user,
-                text: '<b>[Cookie已失效]</b>\n请上传新的Cookie。如何获取Cookie请查看' +
-                    getTagA('https://github.com/MamoruDS/bilibili-notify-telegram-bot/blob/master/README_CN.md#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96cookie', '文档') +
-                    '。\n',
-                parse_mode: 'HTML',
-                disable_web_page_preview: true
-            },
-            method: 'get',
-            proxy: false
-        })
-        .then(function (res) {
-            // console.log(res)
-        })
-        .catch(function (err) {
-            // console.log(err)
-        })
+                baseURL: tg_bot_api,
+                url: '/sendMessage',
+                params: {
+                    chat_id: user,
+                    text: '<b>[Cookie已失效]</b>\n请上传新的Cookie。如何获取Cookie请查看' +
+                        getTagA('https://github.com/MamoruDS/bilibili-notify-telegram-bot/blob/master/README_CN.md#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96cookie', '文档') +
+                        '。\n',
+                    parse_mode: 'HTML',
+                    disable_web_page_preview: true
+                },
+                method: 'get',
+                proxy: false
+            })
+            .then(function (res) {
+                // console.log(res)
+            })
+            .catch(function (err) {
+                // console.log(err)
+            })
     }
 }
 
@@ -153,18 +162,17 @@ function getLastNotis(chat_id, cards, notify_type, last_ts) {
     }
 }
 
-function logDate() {
-    let event = new Date(Date.now());
-    let options = {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        'hour': 'numeric',
-        minute: 'numeric',
-        second: 'numeric'
-    };
-    return event.toLocaleDateString('zh-CN', options)
+function logGen(info, type) {
+    let logStr = `[${type}] ${moment().format('YY-MM-DD  ZZ X')}`
+    switch (type) {
+        case 'warn':
+            console.log(logStr.warn)
+            break
+        case 'error':
+            console.log(logStr.error)
+            break
+    }
+    console.log()
 }
 
 function cardParse(card) {
@@ -309,12 +317,11 @@ function updateCheck(last_update_id) {
         })
 }
 
-var task = schedule.scheduleJob('*/10 * * * * *', function () {
+let task = schedule.scheduleJob('*/10 * * * * *', function () {
     conf = readConf()
     let last_update_id = conf.update_id
     tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
 
     notiCheck()
     updateCheck(last_update_id)
-    console.log("hello")
 })
