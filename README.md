@@ -1,3 +1,4 @@
+![logo](./res/bilibili-noti-bot.png)  
 # bilibili notification telegram bot
 A Telegram bilibili-noti forwarding bot base on bilibili's web API.  
 

@@ -1,3 +1,4 @@
+![logo](./res/bilibili-noti-bot.png)  
 # bilibili notification telegram bot
 一个基于bilibili网页版API的转发消息推送的Telegram bot。 
 
