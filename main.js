@@ -33,6 +33,12 @@ function updateUserCookie(user, cookie) {
     writeConf(_conf)
 }
 
+function updateLastUpdateId(update_id) {
+    let _conf = readConf()
+    _conf.update_id = update_id
+    writeConf(_conf)
+}
+
 function updateUserNotiTS(user, type, ts) {
     let typeSet = conf.user_info[user].notify
     let typeIndex = typeSet.indexOf(type)
@@ -255,19 +261,19 @@ function notiCheck() {
     let user_info = conf['user_info']
     for (user in user_info) {
         user_cookie = user_info[user].cookie
-        if (!user_cookie) {
-            continue
-        }
         user_notify = user_info[user].notify
         user_last_notify_ts = user_info[user].notify_ts
         for (let i = 0; i < user_notify.length; i++) {
+            if (!user_cookie) {
+                continue
+            }
             let res_data = getNotification(user, user_cookie, user_notify[i], user_last_notify_ts[i])
             // let notis = getLastNotis(user, res_data.data.cards, user_notify[i], user_last_notify_ts[i])
         }
     }
 }
 
-function updateCheck() {
+function updateCheck(last_update_id) {
     axios({
             baseURL: tg_bot_api,
             url: '/getUpdates',
@@ -287,10 +293,12 @@ function updateCheck() {
                     switch (update_text[0]) {
                         case "/setCookie":
                             updateUserCookie(user, update_text[1])
+                            userCookieUpdated(user)
                             break
                     }
                 }
             }
+            updateLastUpdateId(last_update_id)
         })
         .catch(function (err) {
             console.log(err)
@@ -299,9 +307,9 @@ function updateCheck() {
 
 var j = schedule.scheduleJob('30 * * * * *', function () {
     conf = readConf()
-    last_update_id = conf.update_id
+    let last_update_id = conf.update_id
     tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
 
     notiCheck()
-    updateCheck()
+    updateCheck(last_update_id)
 })
