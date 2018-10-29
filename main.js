@@ -27,6 +27,12 @@ function writeConf(data) {
     fs.writeFileSync('conf.json', data, 'utf8')
 }
 
+function updateUserCookie(user, cookie){
+    let _conf = readConf()
+    _conf.user_info[user].cookie = cookie
+    writeConf(_conf)
+}
+
 function updateUserNotiTS(user, type, ts) {
     let typeSet = conf.user_info[user].notify
     let typeIndex = typeSet.indexOf(type)
