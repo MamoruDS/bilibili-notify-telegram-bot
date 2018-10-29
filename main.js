@@ -66,19 +66,27 @@ function getNotification(user, cookies, type, ts) {
 
 function userCookieExpired(user) {
     axios({
-        baseURL: tg_bot_api,
-        url: '/sendMessage',
-        params: {
-            chat_id: user,
-            text: '<b>Cookie已过期</b>\n请上传新的Cookie。如何获取Cookie请查看' +
-                getTagA('https://github.com/MamoruDS/bilibili-notify-telegram-bot/blob/master/README_CN.md#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96cookie', '文档') +
-                '。\n',
-            parse_mode: 'HTML',
-            disable_web_page_preview: true
-        },
-        method: 'get',
-        proxy: false
-    })
+            baseURL: tg_bot_api,
+            url: '/sendMessage',
+            params: {
+                chat_id: user,
+                text: '<b>Cookie已过期</b>\n请上传新的Cookie。如何获取Cookie请查看' +
+                    getTagA('https://github.com/MamoruDS/bilibili-notify-telegram-bot/blob/master/README_CN.md#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96cookie', '文档') +
+                    '。\n',
+                parse_mode: 'HTML',
+                disable_web_page_preview: true
+            },
+            method: 'get',
+            proxy: false
+        })
+        .then(function (res) {
+            conf.user_info[user].cookie = undefined
+            writeConf(conf)
+        })
+        .catch(function (err) {
+            // console.log(err)
+        })
+
 }
 
 function getLastNotis(chat_id, cards, notify_type, last_ts) {
