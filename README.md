@@ -1,4 +1,6 @@
-![logo](./res/bilibili-noti-bot.png)  
+<!-- ![logo](./res/bilibili-noti-bot.png) -->
+<p align="center"><img width="300" src="https://github.com/MamoruDS/bilibili-notify-telegram-bot/raw/master/res/bilibili-noti-bot.png" alt="logo"></p>
+
 # bilibili notification telegram bot
 A Telegram bilibili-noti forwarding bot base on bilibili's web API.  
 
