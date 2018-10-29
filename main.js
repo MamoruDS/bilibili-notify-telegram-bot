@@ -218,6 +218,9 @@ function dynamicInfoParser(d_info) {
 }
 
 function notiCheck() {
+    conf = readConf()
+    tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
+    
     let user_info = conf['user_info']
     for (user in user_info) {
         user_cookie = user_info[user].cookie
