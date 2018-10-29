@@ -77,7 +77,10 @@ function getNotification(user, cookies, type, ts) {
 }
 
 function userCookieExpired(user) {
-    axios({
+    let _conf = readConf()
+    if (_conf.user_info[user].cookie){
+        updateUserCookie(user, undefined)
+        axios({
             baseURL: tg_bot_api,
             url: '/sendMessage',
             params: {
@@ -92,11 +95,12 @@ function userCookieExpired(user) {
             proxy: false
         })
         .then(function (res) {
-            updateUserCookie(user, undefined)
+            // console.log(res)
         })
         .catch(function (err) {
             // console.log(err)
         })
+    }
 }
 
 function userCookieUpdated(user) {
@@ -261,12 +265,12 @@ function notiCheck() {
     let user_info = conf['user_info']
     for (user in user_info) {
         user_cookie = user_info[user].cookie
+        if (!user_cookie) {
+            continue
+        }
         user_notify = user_info[user].notify
         user_last_notify_ts = user_info[user].notify_ts
         for (let i = 0; i < user_notify.length; i++) {
-            if (!user_cookie) {
-                continue
-            }
             let res_data = getNotification(user, user_cookie, user_notify[i], user_last_notify_ts[i])
             // let notis = getLastNotis(user, res_data.data.cards, user_notify[i], user_last_notify_ts[i])
         }
@@ -305,11 +309,12 @@ function updateCheck(last_update_id) {
         })
 }
 
-var j = schedule.scheduleJob('30 * * * * *', function () {
+var task = schedule.scheduleJob('*/10 * * * * *', function () {
     conf = readConf()
     let last_update_id = conf.update_id
     tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
 
     notiCheck()
     updateCheck(last_update_id)
+    console.log("hello")
 })
