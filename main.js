@@ -27,7 +27,7 @@ function writeConf(data) {
     fs.writeFileSync('conf.json', data, 'utf8')
 }
 
-function updateUserCookie(user, cookie){
+function updateUserCookie(user, cookie) {
     let _conf = readConf()
     _conf.user_info[user].cookie = cookie
     writeConf(_conf)
@@ -76,7 +76,7 @@ function userCookieExpired(user) {
             url: '/sendMessage',
             params: {
                 chat_id: user,
-                text: '<b>Cookie已过期</b>\n请上传新的Cookie。如何获取Cookie请查看' +
+                text: '<b>[Cookie已失效]</b>\n请上传新的Cookie。如何获取Cookie请查看' +
                     getTagA('https://github.com/MamoruDS/bilibili-notify-telegram-bot/blob/master/README_CN.md#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96cookie', '文档') +
                     '。\n',
                 parse_mode: 'HTML',
@@ -86,14 +86,34 @@ function userCookieExpired(user) {
             proxy: false
         })
         .then(function (res) {
-            conf.user_info[user].cookie = undefined
-            writeConf(conf)
+            updateUserCookie(user, undefined)
         })
         .catch(function (err) {
             // console.log(err)
         })
-
 }
+
+function userCookieUpdated(user) {
+    axios({
+            baseURL: tg_bot_api,
+            url: '/sendMessage',
+            params: {
+                chat_id: user,
+                text: '<b>[Cookie已更新]</b>',
+                parse_mode: 'HTML',
+                disable_web_page_preview: true
+            },
+            method: 'get',
+            proxy: false
+        })
+        .then(function (res) {
+            // console.log(res)
+        })
+        .catch(function (err) {
+            // console.log(err)
+        })
+}
+
 
 function getLastNotis(chat_id, cards, notify_type, last_ts) {
     for (let i = cards.length - 1; i >= 0; i--) {
@@ -232,9 +252,6 @@ function dynamicInfoParser(d_info) {
 }
 
 function notiCheck() {
-    conf = readConf()
-    tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
-
     let user_info = conf['user_info']
     for (user in user_info) {
         user_cookie = user_info[user].cookie
@@ -251,9 +268,6 @@ function notiCheck() {
 }
 
 function updateCheck() {
-    conf = readConf()
-    last_update_id = conf.update_id
-    tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
     axios({
             baseURL: tg_bot_api,
             route: '/getUpdates',
@@ -283,6 +297,11 @@ function updateCheck() {
         })
 }
 
-// var j = schedule.scheduleJob('30 * * * * *', function () {
+var j = schedule.scheduleJob('30 * * * * *', function () {
+    conf = readConf()
+    last_update_id = conf.update_id
+    tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
 
-// })
+    notiCheck()
+    updateCheck()
+})
