@@ -35,6 +35,20 @@ function writeConf(data) {
     fs.writeFileSync(conf_path, data, 'utf8')
 }
 
+function createUserInfo(user, overwrite) {
+    let _conf = readConf()
+    let default_ts = Math.round(Date.now() / 1000)
+    let default_userInfo = {
+        notify: ["8", "16", "512"],
+        notify_ts: [default_ts, default_ts, default_ts],
+        cookie: "undefined"
+    }
+    if (!_conf.user_info[user] || overwrite) {
+        _conf.user_info[user] = default_userInfo
+    }
+    writeConf(_conf)
+}
+
 function updateUserCookie(user, cookie) {
     let _conf = readConf()
     _conf.user_info[user].cookie = cookie
@@ -324,6 +338,9 @@ function updateCheck(last_update_id) {
                             logGen(`'${user}' has post a new cookie.`, 'user')
                             updateUserCookie(user, update_text[1])
                             userCookieUpdated(user)
+                            break
+                        case "/start":
+                            createUserInfo(user, false)
                             break
                     }
                 }
