@@ -7,7 +7,7 @@ const argv = require('yargs').argv
 
 let conf = undefined
 
-const conf_path = argv['f']
+const conf_path = argv['f'] ? argv['f'] : 'conf.json'
 
 if (fs.existsSync(conf_path)) {
     conf = readConf()
