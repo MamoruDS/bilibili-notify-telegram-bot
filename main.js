@@ -3,12 +3,13 @@ const axios = require('axios')
 const schedule = require('node-schedule')
 const moment = require('moment')
 const colors = require('colors')
+const argv = require('yargs').argv
 
 let conf = undefined
 
-const conf_path = ''
+const conf_path = argv['f']
 
-if (fs.existsSync('conf.json')) {
+if (fs.existsSync(conf_path)) {
     conf = readConf()
     // writeConf(conf)
 } else {
@@ -18,7 +19,7 @@ if (fs.existsSync('conf.json')) {
 let tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
 
 function readConf() {
-    return JSON.parse(fs.readFileSync('conf.json', 'utf8'))
+    return JSON.parse(fs.readFileSync(conf_path, 'utf8'))
 }
 
 function writeConf(data) {
@@ -31,7 +32,7 @@ function writeConf(data) {
         logGen('default conf.json has been ganerated.', 'info')
     }
     data = JSON.stringify(data)
-    fs.writeFileSync('conf.json', data, 'utf8')
+    fs.writeFileSync(conf_path, data, 'utf8')
 }
 
 function updateUserCookie(user, cookie) {
@@ -334,6 +335,8 @@ function updateCheck(last_update_id) {
         })
 }
 
+logGen('bot started.', 'info')
+
 let task = schedule.scheduleJob('*/10 * * * * *', function () {
     conf = readConf()
     let last_update_id = conf.update_id
@@ -342,5 +345,3 @@ let task = schedule.scheduleJob('*/10 * * * * *', function () {
     notiCheck()
     updateCheck(last_update_id)
 })
-
-logGen('bot started.', 'info')
