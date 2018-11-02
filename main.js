@@ -6,6 +6,8 @@ const colors = require('colors')
 
 let conf = undefined
 
+const conf_path = ''
+
 if (fs.existsSync('conf.json')) {
     conf = readConf()
     // writeConf(conf)
