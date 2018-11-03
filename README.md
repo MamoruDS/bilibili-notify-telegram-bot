@@ -4,6 +4,26 @@
 A Telegram bilibili-noti forwarding bot base on bilibili's web API.  
 
 [中文README](README_CN.md)
+
+## How to use
+### via node
+```shell
+git clone https://github.com/MamoruDS/bilibili-notify-telegram-bot.git && bilibili-notify-telegram-bot
+npm install
+node main
+```
+### via docker
+Use our image on docker store. [Here](https://store.docker.com/community/images/mamoruio/bilibili-noti-bot) is the image's page.
+```shell
+docker pull mamoruio/bilibili-noti-bot
+docker run -d -t --name bilibili-noti-bot -v /mnt/cfg/file:/app/cfg mamoruio/bilibili-noti-bot
+```
+#### build from Dockerfile
+```
+git clone https://github.com/MamoruDS/bilibili-notify-telegram-bot.git && bilibili-notify-telegram-bot
+build -t yourname/bilibili-noti-bot .
+```
+
 ## How to get Cookie
 We need to provide a cookie called `SESSDATA` for using this API. Since this `SESSDATA` is a `HttpOnly` cookie, it can't get by running Javascript in console, so we need help with other DevTool.  
 - Visit [bilibili](https://www.bilibili.com)'s home page and sign in;
