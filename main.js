@@ -8,6 +8,9 @@ const argv = require('yargs').argv
 let conf = undefined
 
 const conf_path = argv['f'] ? argv['f'] : 'conf.json'
+//TODO: set safe range and type for parameters
+const interval_sec = argv['i'] ? argv['i'] : 10
+const timeout = argv['t'] ? argv['t'] : 600
 
 if (fs.existsSync(conf_path)) {
     conf = readConf()
@@ -95,6 +98,8 @@ function getNotification(user, cookies, type, ts, cookie_valid) {
             proxy: false
         })
         .then(function (res) {
+            let _conf = readConf()
+            cookie_valid = _conf.user_info[user].cookie_valid
             data = res.data
             if (data.msg === 'error' || data.message === 'error') {
                 if (cookie_valid) {
@@ -109,12 +114,17 @@ function getNotification(user, cookies, type, ts, cookie_valid) {
                     updateUserCookieValid(user, true)
                     logGen(`'${user}' cookie confirm has not expired.`, 'info')
                 }
-                getLastNotis(user, data.data.cards, type, ts)
+                if (data.data.cards) {
+                    let c_info = data.data.cards[0]
+                    getLastNotis(user, data.data.cards, type, ts)
+                }
             }
         })
         .catch(function (err) {
-            let status = err.response.status ? err.response.status : 'unknown'
-            logGen(`axios-error: http.status=${err.response.status}`, 'error')
+            // let status = err.response.status ? err.response.status : 'unknown'
+            // logGen(`axios-error: http.status=${err.response.status}`, 'error')
+            //TODO: handle axios err which no http status
+            logGen(`axios-error when get notifications for '${user}'`, 'error')
         })
     return data
 }
@@ -123,28 +133,28 @@ function userCookieExpired(user, send_to_user) {
     let _conf = readConf()
     if (_conf.user_info[user].cookie) {
         updateUserCookie(user, undefined)
-        if (send_to_user){
+        if (send_to_user) {
             axios({
-                baseURL: tg_bot_api,
-                url: '/sendMessage',
-                params: {
-                    chat_id: user,
-                    text: '<b>[Cookie已失效]</b>\n请上传新的Cookie。如何获取Cookie请查看' +
-                        getTagA('https://github.com/MamoruDS/bilibili-notify-telegram-bot/blob/master/README_CN.md#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96cookie', '文档') +
-                        '。\n',
-                    parse_mode: 'HTML',
-                    disable_web_page_preview: true
-                },
-                method: 'get',
-                proxy: false
-            })
-            .then(function (res) {
-                // console.log(res)
-                logGen(`cookie expired info has been sent to '${user}'.`, 'info')
-            })
-            .catch(function (err) {
-                // console.log(err)
-            })
+                    baseURL: tg_bot_api,
+                    url: '/sendMessage',
+                    params: {
+                        chat_id: user,
+                        text: '<b>[Cookie已失效]</b>\n请上传新的Cookie。如何获取Cookie请查看' +
+                            getTagA('https://github.com/MamoruDS/bilibili-notify-telegram-bot/blob/master/README_CN.md#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96cookie', '文档') +
+                            '。\n',
+                        parse_mode: 'HTML',
+                        disable_web_page_preview: true
+                    },
+                    method: 'get',
+                    proxy: false
+                })
+                .then(function (res) {
+                    // console.log(res)
+                    logGen(`cookie expired info has been sent to '${user}'.`, 'info')
+                })
+                .catch(function (err) {
+                    // console.log(err)
+                })
         }
     }
 }
@@ -358,6 +368,11 @@ function updateCheck(last_update_id) {
                     let res_single = res_array[i]
                     let user = res_single.message.from.id
                     let update_text = res_single.message.text.split(' ')
+                    let date_timeout = Math.round(Date.now() / 1000) - res_single.message.date
+                    if (date_timeout >= timeout) {
+                        logGen(`ignored one message sent from '${user}' because timeout.`, 'warn')
+                        continue
+                    }
                     switch (update_text[0]) {
                         case "/setCookie":
                             logGen(`'${user}' has post a new cookie.`, 'user')
@@ -366,6 +381,7 @@ function updateCheck(last_update_id) {
                             userCookieUpdated(user)
                             break
                         case "/start":
+                            logGen(`'${user}' reset/create profile by tg command.`, 'user')
                             createUserInfo(user, false)
                             break
                     }
@@ -378,9 +394,9 @@ function updateCheck(last_update_id) {
         })
 }
 
-logGen('bot started.', 'info')
+logGen('bot started.', 'user')
 
-let task = schedule.scheduleJob('*/10 * * * * *', function () {
+let task = schedule.scheduleJob(`*/${interval_sec} * * * * *`, function () {
     conf = readConf()
     let last_update_id = conf.update_id
     tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
