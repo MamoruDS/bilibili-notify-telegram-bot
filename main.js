@@ -107,7 +107,7 @@ function getNotification(user, cookies, type, ts, cookie_valid) {
                     logGen(`'${user}' cookie may have expired.`, 'warn')
                 } else {
                     logGen(`'${user}' cookie info has expired.`, 'warn')
-                    userCookieExpired(user, false)
+                    userCookieExpired(user, true)
                 }
             } else {
                 if (!cookie_valid) {
@@ -394,7 +394,7 @@ function updateCheck(last_update_id) {
         })
 }
 
-logGen('bot started.', 'user')
+logGen(`bot started. interval(sec):${interval_sec} timeout:${timeout}`, 'user')
 
 let task = schedule.scheduleJob(`*/${interval_sec} * * * * *`, function () {
     conf = readConf()
