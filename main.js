@@ -55,6 +55,12 @@ function updateUserCookie(user, cookie) {
     writeConf(_conf)
 }
 
+function updateUserCookieValid(user, valid) {
+    let _conf = readConf()
+    _conf.user_info[user].cookie_valid = valid
+    writeConf(_conf)
+}
+
 function updateLastUpdateId(update_id) {
     let _conf = readConf()
     _conf.update_id = update_id
@@ -75,7 +81,7 @@ function updateUserNotiTS(user, type, ts) {
     writeConf(_conf)
 }
 
-function getNotification(user, cookies, type, ts) {
+function getNotification(user, cookies, type, ts, cookie_valid) {
     let data = {}
     axios.request('https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/dynamic_new', {
             // timeout: 1000,
@@ -91,23 +97,34 @@ function getNotification(user, cookies, type, ts) {
         .then(function (res) {
             data = res.data
             if (data.msg === 'error' || data.message === 'error') {
-                logGen(`'${user}' cookie info has expired.`, 'warn')
-                userCookieExpired(user)
+                if (cookie_valid) {
+                    updateUserCookieValid(user, false)
+                    logGen(`'${user}' cookie may have expired.`, 'warn')
+                } else {
+                    logGen(`'${user}' cookie info has expired.`, 'warn')
+                    userCookieExpired(user, false)
+                }
             } else {
+                if (!cookie_valid) {
+                    updateUserCookieValid(user, true)
+                    logGen(`'${user}' cookie confirm has not expired.`, 'info')
+                }
                 getLastNotis(user, data.data.cards, type, ts)
             }
         })
         .catch(function (err) {
+            let status = err.response.status ? err.response.status : 'unknown'
             logGen(`axios-error: http.status=${err.response.status}`, 'error')
         })
     return data
 }
 
-function userCookieExpired(user) {
+function userCookieExpired(user, send_to_user) {
     let _conf = readConf()
     if (_conf.user_info[user].cookie) {
         updateUserCookie(user, undefined)
-        axios({
+        if (send_to_user){
+            axios({
                 baseURL: tg_bot_api,
                 url: '/sendMessage',
                 params: {
@@ -128,6 +145,7 @@ function userCookieExpired(user) {
             .catch(function (err) {
                 // console.log(err)
             })
+        }
     }
 }
 
@@ -307,10 +325,17 @@ function notiCheck() {
         if (!user_cookie) {
             continue
         }
-        user_notify = user_info[user].notify
-        user_last_notify_ts = user_info[user].notify_ts
+        let user_notify = user_info[user].notify
+        let user_last_notify_ts = user_info[user].notify_ts
+        let user_cookie_valid
+        if (user_info[user].cookie_valid === undefined) {
+            user_cookie_valid = true
+            updateUserCookieValid(user, true)
+        } else {
+            user_cookie_valid = user_info[user].cookie_valid
+        }
         for (let i = 0; i < user_notify.length; i++) {
-            let res_data = getNotification(user, user_cookie, user_notify[i], user_last_notify_ts[i])
+            let res_data = getNotification(user, user_cookie, user_notify[i], user_last_notify_ts[i], user_cookie_valid)
             // let notis = getLastNotis(user, res_data.data.cards, user_notify[i], user_last_notify_ts[i])
         }
     }
@@ -337,6 +362,7 @@ function updateCheck(last_update_id) {
                         case "/setCookie":
                             logGen(`'${user}' has post a new cookie.`, 'user')
                             updateUserCookie(user, update_text[1])
+                            updateUserCookieValid(user, true)
                             userCookieUpdated(user)
                             break
                         case "/start":
