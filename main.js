@@ -11,6 +11,7 @@ const conf_path = argv['f'] ? argv['f'] : 'conf.json'
 //TODO: set safe range and type for parameters
 const interval_sec = argv['i'] ? argv['i'] : 10
 const timeout = argv['t'] ? argv['t'] : 600
+const cookie_warn = argv['cookie-warn'] ? true : false
 
 if (fs.existsSync(conf_path)) {
     conf = readConf()
@@ -104,7 +105,7 @@ function getNotification(user, cookies, type, ts, cookie_valid) {
             if (data.msg === 'error' || data.message === 'error') {
                 if (cookie_valid) {
                     updateUserCookieValid(user, false)
-                    logGen(`'${user}' cookie may have expired.`, 'warn')
+                    logGen(`'${user}' cookie may have expired.`, 'warn', cookie_warn)
                 } else {
                     logGen(`'${user}' cookie info has expired.`, 'warn')
                     userCookieExpired(user, true)
@@ -112,7 +113,7 @@ function getNotification(user, cookies, type, ts, cookie_valid) {
             } else {
                 if (!cookie_valid) {
                     updateUserCookieValid(user, true)
-                    logGen(`'${user}' cookie confirm has not expired.`, 'info')
+                    logGen(`'${user}' cookie confirm has not expired.`, 'info', cookie_warn)
                 }
                 if (data.data.cards) {
                     let c_info = data.data.cards[0]
@@ -210,7 +211,8 @@ function getLastNotis(chat_id, cards, notify_type, last_ts) {
     }
 }
 
-function logGen(info, type) {
+function logGen(info, type, display) {
+    display = display ? true : false
     let typeStr = ''
     switch (type) {
         case 'info':
@@ -231,7 +233,9 @@ function logGen(info, type) {
         default:
             typeStr = 'UNKNOWN'.grey.bold
     }
-    console.log(`[${typeStr}] ${moment().format('YY-MM-DD_HH:mm:ss_X').white} ${info.bold}`)
+    if (display) {
+        console.log(`[${typeStr}] ${moment().format('YY-MM-DD_HH:mm:ss_X').white} ${info.bold}`)
+    }
 }
 
 function cardParse(card) {
