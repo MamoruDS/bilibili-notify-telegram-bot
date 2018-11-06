@@ -211,8 +211,7 @@ function getLastNotis(chat_id, cards, notify_type, last_ts) {
     }
 }
 
-function logGen(info, type, display) {
-    display = display ? true : false
+function logGen(info, type, display = true) {
     let typeStr = ''
     switch (type) {
         case 'info':
