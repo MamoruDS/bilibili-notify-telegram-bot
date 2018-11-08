@@ -203,7 +203,7 @@ function getLastNotis(chat_id, cards) {
                     logGen(`notification has been sent to '${chat_id}'`, 'normal')
                 })
                 .catch(function (err) {
-                    AxiosErrHandle(err, `sending notification to '${user}'`)
+                    AxiosErrHandle(err, `sending notification to '${chat_id}'`)
                 })
         }
     }
@@ -405,7 +405,7 @@ function updateCheck(last_update_id) {
             updateLastUpdateId(last_update_id)
         })
         .catch(function (err) {
-            AxiosErrHandle(err, `sending reset/create user info message to '${user}'`)
+            AxiosErrHandle(err, `fetching updates from telegramAPI`)
         })
 }
 
