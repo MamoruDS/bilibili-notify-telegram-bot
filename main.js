@@ -414,7 +414,7 @@ function updateCheck(last_update_id) {
         })
 }
 
-logGen(`bot started. interval(sec):${interval_sec} timeout:${timeout}`, 'user')
+logGen('bot started. interval(sec):' + interval_sec.toString().bold.green + ' timeout:' + timeout.toString().bold.red, 'info')
 
 let task = schedule.scheduleJob(`*/${interval_sec} * * * * *`, function () {
     conf = readConf()
