@@ -100,7 +100,7 @@ function getNotification(user, cookies) {
         })
         .then(function (res) {
             let _conf = readConf()
-            cookie_valid = _conf.user_info[user].cookie_valid
+            let cookie_valid = _conf.user_info[user].cookie_valid
             data = res.data
             if (data.msg === 'error' || data.message === 'error') {
                 if (cookie_valid) {
@@ -355,8 +355,8 @@ let AxiosErrHandle = (err, req_msg = 'sending request') => {
 function notiCheck() {
     let _conf = readConf()
     let user_info = _conf['user_info']
-    for (user in user_info) {
-        user_cookie = user_info[user].cookie
+    for (let user in user_info) {
+        let user_cookie = user_info[user].cookie
         if (!user_cookie) {
             continue
         }
@@ -375,9 +375,9 @@ function updateCheck(last_update_id) {
             method: 'get'
         })
         .then(function (res) {
-            res_array = res.data.result
+            let res_array = res.data.result
             for (let i = 0; i < res_array.length; i++) {
-                current_update_id = res_array[i].update_id
+                let current_update_id = res_array[i].update_id
                 if (current_update_id > last_update_id) {
                     last_update_id = current_update_id
                     let res_single = res_array[i]
@@ -420,7 +420,7 @@ let confFormatCheck = () => {
 
     let user_info = _conf.user_info
     if (user_info) {
-        for (user in user_info) {
+        for (let user in user_info) {
             let user_detail = user_info[user]
             let user_re = {
                 cookie: user_detail.cookie,
