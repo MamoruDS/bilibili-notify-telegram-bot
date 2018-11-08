@@ -4,8 +4,7 @@ const schedule = require('node-schedule')
 const moment = require('moment')
 const colors = require('colors')
 const argv = require('yargs').argv
-
-let conf = undefined
+const beautify = require('js-beautify')
 
 const conf_path = argv['f'] ? argv['f'] : 'conf.json'
 //TODO: set safe range and type for parameters
@@ -13,14 +12,7 @@ const interval_sec = argv['i'] ? argv['i'] : 10
 const timeout = argv['t'] ? argv['t'] : 600
 const cookie_warn = argv['cookie-warn'] ? true : false
 
-if (fs.existsSync(conf_path)) {
-    conf = readConf()
-    // writeConf(conf)
-} else {
-    writeConf()
-}
-
-let tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
+let tg_bot_api = undefined
 
 function readConf() {
     return JSON.parse(fs.readFileSync(conf_path, 'utf8'))
@@ -36,6 +28,7 @@ function writeConf(data) {
         logGen('default conf.json has been ganerated.', 'info')
     }
     data = JSON.stringify(data)
+    data = beautify(data, {indent_size: 4})
     fs.writeFileSync(conf_path, data, 'utf8')
 }
 
@@ -417,9 +410,9 @@ function updateCheck(last_update_id) {
 logGen('bot started. interval(sec):' + interval_sec.toString().bold.green + ' timeout:' + timeout.toString().bold.red, 'info')
 
 let task = schedule.scheduleJob(`*/${interval_sec} * * * * *`, function () {
-    conf = readConf()
-    let last_update_id = conf.update_id
-    tg_bot_api = 'https://api.telegram.org/bot' + conf.bot_token
+    let _conf = readConf()
+    let last_update_id = _conf.update_id
+    tg_bot_api = 'https://api.telegram.org/bot' + _conf.bot_token
 
     notiCheck()
     updateCheck(last_update_id)
