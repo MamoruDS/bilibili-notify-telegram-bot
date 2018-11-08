@@ -25,7 +25,8 @@ build -t yourname/bilibili-noti-bot .
 ```
 
 ## How to get Cookie
-We need to provide a cookie called `SESSDATA` for using this API. Since this `SESSDATA` is a `HttpOnly` cookie, it can't get by running Javascript in console, so we need help with other DevTool.  
+### via web browser
+We need to provide a cookie called `SESSDATA` for using this API. Since this `SESSDATA` is a `HttpOnly` cookie, it can't get by running Javascript in browser console, so we need help with other DevTool.  
 - Visit [bilibili](https://www.bilibili.com)'s home page and sign in;
 - Open **Network** panel in DevTools of browser on the page;
 - Send a request to bilibili's API by [url](https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/dynamic_new?uid=0&type=512);
@@ -39,3 +40,4 @@ We need to provide a cookie called `SESSDATA` for using this API. Since this `SE
     /setCookie SESSDATA=ea56c6%34C14155%C46a257;
     ```
 - Wait for bot's response.
+### via MitM

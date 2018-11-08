@@ -4,7 +4,27 @@
 一个基于bilibili网页版API的转发消息推送的Telegram bot。 
 
 [English README](README.md)
+## 如何使用
+### 通过node
+```shell
+git clone https://github.com/MamoruDS/bilibili-notify-telegram-bot.git && bilibili-notify-telegram-bot
+npm install
+node main
+```
+### 通过docker镜像
+Use our image on docker store. [Here](https://store.docker.com/community/images/mamoruio/bilibili-noti-bot) is the image's page.
+```shell
+docker pull mamoruio/bilibili-noti-bot
+docker run -d -t --name bilibili-noti-bot -v /mnt/cfg/file:/app/cfg mamoruio/bilibili-noti-bot
+```
+#### 通过Dockerfile
+```
+git clone https://github.com/MamoruDS/bilibili-notify-telegram-bot.git && bilibili-notify-telegram-bot
+build -t yourname/bilibili-noti-bot .
+```
+
 ## 如何获取Cookie
+### 通过浏览器获取
 使用该API需要提供名为`SESSDATA`的cookie，为`HttpOnly` cookie，无法通过Javascript获取，故需要借助浏览器的调试工具获取。更多关于`HttpOnly`的详情请查看此[页面](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Cookies#Cookie%E7%9A%84Secure_%E5%92%8CHttpOnly_%E6%A0%87%E8%AE%B0)。  
 - 访问网页版[bilibili](https://www.bilibili.com)后登录你的账号；
 - 打开浏览器调试工具的**Network**面板；
@@ -19,3 +39,4 @@
     /setCookie SESSDATA=ea56c6%34C14155%C46a257;
     ```
 - 等待bot返回cookie更新成功的消息。
+### 通过MitM获取
