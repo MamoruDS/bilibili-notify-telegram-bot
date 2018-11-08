@@ -85,6 +85,12 @@ function updateUserNotiTS(user, type, ts) {
     writeConf(_conf)
 }
 
+function updateUserUpdateTS(user, ts) {
+    let _conf = readConf()
+    _conf.user_info[user].update_ts = ts
+    writeConf(_conf)
+}
+
 function getNotification(user, cookies) {
     let data = {}
     axios.request('https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/dynamic_new', {
@@ -199,7 +205,7 @@ function getLastNotis(chat_id, cards) {
             let tg_method_obj = cardStylize(card_obj, c_desc.type)
             tg_method_obj.chat_id = chat_id
 
-            updateUserNotiTS(chat_id, c_desc.type, c_desc.timestamp)
+            updateUserUpdateTS(chat_id, c_desc.timestamp)
             // console.log(tg_method_obj)
             axios.request(tg_bot_api + tg_method_obj.route, {
                     params: tg_method_obj,
