@@ -41,10 +41,9 @@ function writeConf(data) {
 
 function createUserInfo(user, overwrite) {
     let _conf = readConf()
-    let default_ts = getTimestamp()
     let default_userInfo = {
-        notify: ["8", "16", "512"],
-        notify_ts: [default_ts, default_ts, default_ts],
+        type_range: ["8", "16", "512"],
+        update_ts: getTimestamp(),
         cookie: "undefined"
     }
     if (!_conf.user_info[user] || overwrite) {
@@ -202,7 +201,7 @@ function getLastNotis(chat_id, cards) {
             if (type_range.indexOf(c_desc.type.toString()) === -1 && type_range.indexOf(c_desc.type) === -1) continue
             // last_ts = c_desc.timestamp
             let card_obj = cardParse(c_card)
-            let tg_method_obj = cardStylize(card_obj, c_desc.type)
+            let tg_method_obj = cardStylize(card_obj, c_desc.type.toString())
             tg_method_obj.chat_id = chat_id
 
             updateUserUpdateTS(chat_id, c_desc.timestamp)
@@ -359,19 +358,10 @@ function notiCheck() {
         if (!user_cookie) {
             continue
         }
-        let user_notify = user_info[user].notify
-        let user_last_notify_ts = user_info[user].notify_ts
-        let user_cookie_valid
         if (user_info[user].cookie_valid === undefined) {
-            user_cookie_valid = true
             updateUserCookieValid(user, true)
-        } else {
-            user_cookie_valid = user_info[user].cookie_valid
         }
-        for (let i = 0; i < user_notify.length; i++) {
-            let res_data = getNotification(user, user_cookie)
-            // let notis = getLastNotis(user, res_data.data.cards, user_notify[i], user_last_notify_ts[i])
-        }
+        getNotification(user, user_cookie)
     }
 }
 
