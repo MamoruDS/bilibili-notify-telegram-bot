@@ -41,7 +41,7 @@ function writeConf(data) {
 
 function createUserInfo(user, overwrite) {
     let _conf = readConf()
-    let default_ts = Math.round(Date.now() / 1000)
+    let default_ts = getTimestamp()
     let default_userInfo = {
         notify: ["8", "16", "512"],
         notify_ts: [default_ts, default_ts, default_ts],
@@ -76,7 +76,7 @@ function updateUserNotiTS(user, type, ts) {
     let typeSet = _conf.user_info[user].notify
     let typeIndex = typeSet.indexOf(type)
     if (typeIndex === -1) {
-        ts = Math.round(Date.now() / 1000)
+        ts = getTimestamp()
         _conf.user_info[user].notify.push(type)
         _conf.user_info[user].notify_ts.push(ts)
     } else {
@@ -85,13 +85,13 @@ function updateUserNotiTS(user, type, ts) {
     writeConf(_conf)
 }
 
-function getNotification(user, cookies, type, ts, cookie_valid) {
+function getNotification(user, cookies) {
     let data = {}
     axios.request('https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/dynamic_new', {
             // timeout: 1000,
             params: {
                 uid: 0,
-                type: type,
+                type: 268435455,
             },
             headers: {
                 Cookie: cookies,
@@ -116,8 +116,8 @@ function getNotification(user, cookies, type, ts, cookie_valid) {
                     logGen(`'${user}' cookie confirm has not expired.`, 'info', cookie_warn)
                 }
                 if (data.data.cards) {
-                    let c_info = data.data.cards[0]
-                    getLastNotis(user, data.data.cards, type, ts)
+                    // let c_info = data.data.cards[0]
+                    getLastNotis(user, data.data.cards)
                 }
             }
         })
@@ -183,18 +183,23 @@ function userCookieUpdated(user) {
 }
 
 
-function getLastNotis(chat_id, cards, notify_type, last_ts) {
+function getLastNotis(chat_id, cards) {
+    let _conf = readConf()
+    let type_range = _conf.user_info[chat_id].type_range
+    let update_ts = _conf.user_info[chat_id].update_ts
+    if (!update_ts) update_ts = getTimestamp(true)
     for (let i = cards.length - 1; i >= 0; i--) {
         let c_info = cards[i]
         let c_desc = c_info.desc
         let c_card = c_info.card
-        if (c_desc.timestamp > last_ts) {
+        if (c_desc.timestamp > update_ts) {
+            if (type_range.indexOf(c_desc.type.toString()) === -1 && type_range.indexOf(c_desc.type) === -1) continue
             // last_ts = c_desc.timestamp
             let card_obj = cardParse(c_card)
-            let tg_method_obj = cardStylize(card_obj, notify_type)
+            let tg_method_obj = cardStylize(card_obj, c_desc.type)
             tg_method_obj.chat_id = chat_id
 
-            updateUserNotiTS(chat_id, notify_type, c_desc.timestamp)
+            updateUserNotiTS(chat_id, c_desc.type, c_desc.timestamp)
             // console.log(tg_method_obj)
             axios.request(tg_bot_api + tg_method_obj.route, {
                     params: tg_method_obj,
@@ -331,8 +336,18 @@ function dynamicInfoParser(d_info) {
     return d_info_str
 }
 
+let getTimestamp = (timeout_bool = false) => {
+    let cur_ts = Math.round(Date() / 1000)
+    if (timeout_bool) {
+        return cur_ts - timeout
+    } else {
+        return cur_ts
+    }
+}
+
 function notiCheck() {
-    let user_info = conf['user_info']
+    let _conf = readConf()
+    let user_info = _conf['user_info']
     for (user in user_info) {
         user_cookie = user_info[user].cookie
         if (!user_cookie) {
@@ -348,7 +363,7 @@ function notiCheck() {
             user_cookie_valid = user_info[user].cookie_valid
         }
         for (let i = 0; i < user_notify.length; i++) {
-            let res_data = getNotification(user, user_cookie, user_notify[i], user_last_notify_ts[i], user_cookie_valid)
+            let res_data = getNotification(user, user_cookie)
             // let notis = getLastNotis(user, res_data.data.cards, user_notify[i], user_last_notify_ts[i])
         }
     }
@@ -371,8 +386,8 @@ function updateCheck(last_update_id) {
                     let res_single = res_array[i]
                     let user = res_single.message.from.id
                     let update_text = res_single.message.text.split(' ')
-                    let date_timeout = Math.round(Date.now() / 1000) - res_single.message.date
-                    if (date_timeout >= timeout) {
+                    let date_timeout = getTimestamp(true)
+                    if (date_timeout >= res_single.message.date) {
                         logGen(`ignored one message sent from '${user}' because timeout.`, 'warn')
                         continue
                     }
