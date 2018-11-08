@@ -341,13 +341,13 @@ let getTimestamp = (timeout_bool = false) => {
 let AxiosErrHandle = (err, req_msg = 'sending request') => {
     let err_msg = undefined
     if (err.response) {
-        err_msg = 'response.data:'.bold + err.response.data.dim + '\n' +
-            'response.status:'.bold + err.response.status.dim + '\n' +
-            'response.headers:'.bold + err.response.headers.dim
+        err_msg = 'response.data: \n'.white + beautify(JSON.stringify(err.response.data)).dim + '\n' +
+            'response.status: '.white + beautify(JSON.stringify(err.response.status)).dim
+        // 'response.headers: \n'.white + beautify(JSON.stringify(err.response.headers)).dim + '\n'
     } else {
-        err_msg = err.message.dim
+        err_msg = 'axios err-message: '.white + err.message.dim
     }
-    err_msg = err.message.dim
+
     let msg = 'axios-error when ' + req_msg.bold + ', ERRMSG:\n' + err_msg
     logGen(msg, 'error')
 }
@@ -389,7 +389,7 @@ function updateCheck(last_update_id) {
                         continue
                     }
                     switch (update_text[0]) {
-                        case "/setCookie":
+                        case "/set_cookie":
                             logGen(`'${user}' has post a new cookie.`, 'user')
                             updateUserCookie(user, update_text[1])
                             updateUserCookieValid(user, true)
