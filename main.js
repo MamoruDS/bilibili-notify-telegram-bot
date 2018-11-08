@@ -127,10 +127,7 @@ function getNotification(user, cookies) {
             }
         })
         .catch(function (err) {
-            // let status = err.response.status ? err.response.status : 'unknown'
-            // logGen(`axios-error: http.status=${err.response.status}`, 'error')
-            //TODO: handle axios err which no http status
-            logGen(`axios-error when get notifications for '${user}'`, 'error')
+            AxiosErrHandle(err, `fetching notifications of '${user}'`)
         })
     return data
 }
@@ -155,11 +152,10 @@ function userCookieExpired(user, send_to_user) {
                     proxy: false
                 })
                 .then(function (res) {
-                    // console.log(res)
-                    logGen(`cookie expired info has been sent to '${user}'.`, 'info')
+                    logGen(`cookie expired message has been sent to '${user}'.`, 'info')
                 })
                 .catch(function (err) {
-                    // console.log(err)
+                    AxiosErrHandle(err, `sending cookie expired message to '${user}'`)
                 })
         }
     }
@@ -179,14 +175,12 @@ function userCookieUpdated(user) {
             proxy: false
         })
         .then(function (res) {
-            // console.log(res)
-            logGen(`cookie updated info has been sent to '${user}'.`, 'info')
+            logGen(`cookie updated message has been sent to '${user}'.`, 'info')
         })
         .catch(function (err) {
-            // console.log(err)
+            AxiosErrHandle(err, `sending cookie updated message to '${user}'`)
         })
 }
-
 
 function getLastNotis(chat_id, cards) {
     let _conf = readConf()
@@ -198,24 +192,23 @@ function getLastNotis(chat_id, cards) {
         let c_desc = c_info.desc
         let c_card = c_info.card
         if (c_desc.timestamp > update_ts) {
-            if (type_range.indexOf(c_desc.type.toString()) === -1 && type_range.indexOf(c_desc.type) === -1) continue
-            // last_ts = c_desc.timestamp
+            if (type_range.indexOf(c_desc.type.toString()) === -1 && type_range.indexOf(c_desc.type) === -1) {
+                continue
+            }
             let card_obj = cardParse(c_card)
             let tg_method_obj = cardStylize(card_obj, c_desc.type.toString())
             tg_method_obj.chat_id = chat_id
 
             updateUserUpdateTS(chat_id, c_desc.timestamp)
-            // console.log(tg_method_obj)
             axios.request(tg_bot_api + tg_method_obj.route, {
                     params: tg_method_obj,
                     proxy: false
                 })
                 .then(function (res) {
                     logGen(`notification has been sent to '${chat_id}'`, 'normal')
-                    // console.log(res.data)
                 })
                 .catch(function (err) {
-                    // console.log(err)
+                    AxiosErrHandle(err, `sending notification to '${user}'`)
                 })
         }
     }
@@ -350,6 +343,20 @@ let getTimestamp = (timeout_bool = false) => {
     }
 }
 
+let AxiosErrHandle = (err, req_msg = 'sending request') => {
+    let err_msg = undefined
+    if (err.response) {
+        err_msg = 'response.data:'.bold + err.response.data.dim + '\n' +
+            'response.status:'.bold + err.response.status.dim + '\n' +
+            'response.headers:'.bold + err.response.headers.dim
+    } else {
+        err_msg = err.message.dim
+    }
+    err_msg = err.message.dim
+    let msg = 'axios-error when ' + req_msg.bold + ', ERRMSG:\n' + err_msg
+    logGen(msg, 'error')
+}
+
 function notiCheck() {
     let _conf = readConf()
     let user_info = _conf['user_info']
@@ -373,7 +380,6 @@ function updateCheck(last_update_id) {
             method: 'get'
         })
         .then(function (res) {
-            // console.log(res.data)
             res_array = res.data.result
             for (let i = 0; i < res_array.length; i++) {
                 current_update_id = res_array[i].update_id
@@ -395,7 +401,7 @@ function updateCheck(last_update_id) {
                             userCookieUpdated(user)
                             break
                         case "/start":
-                            logGen(`'${user}' reset/create profile by tg command.`, 'user')
+                            logGen(`'${user}' reset/create profile by bot command.`, 'user')
                             createUserInfo(user, false)
                             break
                     }
@@ -404,7 +410,7 @@ function updateCheck(last_update_id) {
             updateLastUpdateId(last_update_id)
         })
         .catch(function (err) {
-            // console.log(err)
+            AxiosErrHandle(err, `sending reset/create user info message to '${user}'`)
         })
 }
 
