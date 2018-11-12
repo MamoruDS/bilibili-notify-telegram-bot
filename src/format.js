@@ -1,15 +1,22 @@
 import {
     timeout
 } from './main'
+import {
+    logGen
+} from './log'
 
-export const cardParse = (card)=> {
-    card = card.replace(new RegExp('\\\\', 'g'), '')
-    card = card.replace(new RegExp('\\"', 'g'), '"')
-    card = JSON.parse(card)
+export const cardParse = (card) => {
+    card = card.replace(new RegExp('\\\\\\"', 'g'), `'`)
+    card = card.replace(new RegExp('\\\\', 'g'), ``)
+    try {
+        card = JSON.parse(card)
+    } catch (err) {
+        logGen('cardParse: ' + err.toString(),'warn')
+    }
     return card
 }
 
-export const cardStylize=(card_obj, notify_type) =>{
+export const cardStylize = (card_obj, notify_type) => {
     let tgm_obj = {
         route: undefined,
         text: '',
