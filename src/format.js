@@ -11,7 +11,7 @@ export const cardParse = (card) => {
     try {
         card = JSON.parse(card)
     } catch (err) {
-        logGen('cardParse: ' + err.toString(),'warn')
+        logGen('cardParse: ' + err.toString(), 'error')
     }
     return card
 }

@@ -64,7 +64,12 @@ export const getLastNotis = (chat_id, cards) => {
         let c_desc = c_info.desc
         let c_card = c_info.card
         if (c_desc.timestamp > update_ts) {
+            if (c_desc.timestamp < format.getTimestamp(true)) {
+                conf.updateUserUpdateTS(chat_id, c_desc.timestamp)
+                continue
+            }
             if (type_range.indexOf(c_desc.type.toString()) === -1 && type_range.indexOf(c_desc.type) === -1) {
+                conf.updateUserUpdateTS(chat_id, c_desc.timestamp)
                 continue
             }
             let card_obj = format.cardParse(c_card)
