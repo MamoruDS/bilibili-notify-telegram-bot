@@ -36,7 +36,19 @@ export const cardStylize = (card_obj, notify_type) => {
         parse_mode: 'HTML',
     }
     switch (notify_type) {
+        case "1":
+            // forward
+            break
+        case "2":
+            // message with photo
+            tgm_obj.route = '/sendPhoto'
+            tgm_obj.photo = card_obj.item.pictures.img_src
+            tgm_obj.caption = `${getTagBold('[关注UP 发布动态]')}\n# ${card_obj.user.name}\n${card_obj.item.description}`
+            tgm_obj.parse_mode = 'HTML'
+            break
+
         case "8":
+            // message with submit
             tgm_obj.route = '/sendPhoto'
             tgm_obj.photo = card_obj.pic
             tgm_obj.caption = '<b>[关注UP 投稿视频]</b>\n' +
@@ -48,6 +60,7 @@ export const cardStylize = (card_obj, notify_type) => {
             tgm_obj.parse_mode = 'HTML'
             break
         case "16":
+            // message with clip
             tgm_obj.route = '/sendVideo'
             tgm_obj.video = card_obj.item.video_playurl
             tgm_obj.duration = card_obj.item.video_time
@@ -57,6 +70,7 @@ export const cardStylize = (card_obj, notify_type) => {
             tgm_obj.parse_mode = 'HTML'
             break
         case "512":
+            // bangumi update
             tgm_obj.route = '/sendPhoto'
             tgm_obj.photo = card_obj.cover
             tgm_obj.caption = '<b>[番剧更新]</b>\n' +
