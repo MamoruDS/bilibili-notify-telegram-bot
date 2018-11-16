@@ -77,6 +77,8 @@ export const getLastNotis = (chat_id, cards) => {
             tg_method_obj.chat_id = chat_id
 
             conf.updateUserUpdateTS(chat_id, c_desc.timestamp)
+
+            if (tg_method_obj.route === undefined) continue
             axios.request(tg_bot_api + tg_method_obj.route, {
                     params: tg_method_obj,
                     proxy: false
