@@ -75,7 +75,7 @@ export const confFormatCheck = () => {
 export const createUserInfo = (user, overwrite) => {
     let _conf = readConf()
     let default_userInfo = {
-        type_range: ["8", "16", "512"],
+        type_range: ["2", "8", "16", "512"],
         update_ts: format.getTimestamp(true),
         cookie: "undefined"
     }
