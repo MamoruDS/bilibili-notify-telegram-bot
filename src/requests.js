@@ -140,7 +140,7 @@ export const updateCheck = (last_update_id) => {
                             break
                         case "/start":
                             logGen(`'${user}' reset/create profile by bot command.`, 'user')
-                            format.createUserInfo(user, false)
+                            conf.createUserInfo(user, false)
                             break
                     }
                 }
@@ -157,6 +157,7 @@ export const userCookieExpired = (user, send_to_user) => {
     let _conf = conf.readConf()
     if (_conf.user_info[user].cookie) {
         conf.updateUserCookie(user, undefined)
+        // send_to_user = false
         if (send_to_user) {
             axios({
                     baseURL: tg_bot_api,
