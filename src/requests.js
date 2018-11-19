@@ -54,7 +54,7 @@ export const getNotification = (user, cookies) => {
 }
 
 
-export const getLastNotis = (chat_id, cards) => {
+export const getLastNotis = (chat_id, cards, conf_update = true) => {
     let _conf = conf.readConf()
     let type_range = _conf.user_info[chat_id].type_range
     let update_ts = _conf.user_info[chat_id].update_ts
@@ -64,19 +64,13 @@ export const getLastNotis = (chat_id, cards) => {
         let c_desc = c_info.desc
         let c_card = c_info.card
         if (c_desc.timestamp > update_ts) {
-            if (c_desc.timestamp < format.getTimestamp(true)) {
-                conf.updateUserUpdateTS(chat_id, c_desc.timestamp)
-                continue
-            }
-            if (type_range.indexOf(c_desc.type.toString()) === -1 && type_range.indexOf(c_desc.type) === -1) {
-                conf.updateUserUpdateTS(chat_id, c_desc.timestamp)
-                continue
-            }
+            if (conf_update) conf.updateUserUpdateTS(chat_id, c_desc.timestamp)
+            if (c_desc.timestamp < format.getTimestamp(true)) continue
+            if (type_range.indexOf(c_desc.type.toString()) === -1 && type_range.indexOf(c_desc.type) === -1) continue
+
             let card_obj = format.cardParse(c_card)
             let tg_method_obj = format.cardStylize(card_obj, c_desc.type.toString())
             tg_method_obj.chat_id = chat_id
-
-            conf.updateUserUpdateTS(chat_id, c_desc.timestamp)
 
             if (tg_method_obj.route === undefined) continue
             axios.request(tg_bot_api + tg_method_obj.route, {
@@ -87,7 +81,15 @@ export const getLastNotis = (chat_id, cards) => {
                     logGen(`notification has been sent to '${chat_id}'`, 'normal')
                 })
                 .catch((err) => {
-                    AxiosErrHandle(err, `sending notification to '${chat_id}'`)
+                    if (err.response) {
+                        if (err.response.status === 400) {
+                            getLastNotis(chat_id, cards, false)
+                        } else {
+                            AxiosErrHandle(err, `sending notification to '${chat_id}'`)
+                        }
+                    } else {
+                        AxiosErrHandle(err, `sending notification to '${chat_id}'`)
+                    }
                 })
         }
     }
