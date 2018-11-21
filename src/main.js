@@ -13,11 +13,14 @@ export const conf_path = argv['f'] ? argv['f'] : 'conf.json'
 //TODO: set safe range and type for parameters
 const interval_sec = argv['i'] ? argv['i'] : 10
 export const timeout = argv['t'] ? argv['t'] : 600
+export const timeoutNotis = argv['timeout-notis'] ? argv['timeout-notis'] : 43200
 export const cookie_warn = argv['cookie-warn'] ? true : false
 
 export let tg_bot_api = undefined
 
-logGen('bot started. interval(sec):'.bold + interval_sec.toString().bold.green + ' timeout:'.bold + timeout.toString().bold.red, 'info')
+logGen('bot started. interval(sec):'.bold + interval_sec.toString().bold.yellow +
+    ' timeout:'.bold + timeout.toString().bold.red +
+    ' timeout-notis:'.bold + timeoutNotis.toString().bold.red, 'info')
 conf.confFormatCheck()
 
 schedule.scheduleJob(`*/${interval_sec} * * * * *`, () => {
