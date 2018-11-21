@@ -1,5 +1,5 @@
 import {
-    timeout
+    timeout, timeoutNotis
 } from './main'
 import {
     logGen
@@ -121,6 +121,15 @@ export const getTimestamp = (timeout_bool = false) => {
     let cur_ts = Math.round(Date.now() / 1000)
     if (timeout_bool) {
         return cur_ts - timeout
+    } else {
+        return cur_ts
+    }
+}
+
+export const getTimestampNotis = (timeout_bool = false) => {
+    let cur_ts = getTimestamp()
+    if (timeout_bool) {
+        return cur_ts - timeoutNotis
     } else {
         return cur_ts
     }
