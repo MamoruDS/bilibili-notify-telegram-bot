@@ -88,7 +88,12 @@ export const getLastNotis = (chat_id, cards, conf_update = true) => {
                             AxiosErrHandle(err, `sending notification to '${chat_id}'`)
                         }
                     } else {
-                        AxiosErrHandle(err, `sending notification to '${chat_id}'`)
+                        if (err.message == 'socket hang up') {
+                            // logGen('"socket hang up" error catched', 'user')
+                            getLastNotis(chat_id, cards, false)
+                        } else {
+                            AxiosErrHandle(err, `sending notification to '${chat_id}'`)
+                        }
                     }
                 })
         }
