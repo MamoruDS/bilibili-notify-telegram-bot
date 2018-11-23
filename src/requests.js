@@ -28,7 +28,7 @@ export const getNotification = (user, cookies) => {
             let _conf = conf.readConf()
             let cookie_valid = _conf.user_info[user].cookie_valid
             data = res.data
-            if (data.msg === 'error' || data.message === 'error') {
+            if (data.msg === 'error' || data.message === 'error' || data.code === -6) {
                 if (cookie_valid) {
                     conf.updateUserCookieValid(user, false)
                     logGen(`'${user}' cookie may have expired.`, 'warn', cookie_warn)
