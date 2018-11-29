@@ -143,4 +143,5 @@ export const getCookie = (user_sent) => {
     if (!/;$/.test(user_sent)) {
         user_sent = `${user_sent};`
     }
+    return user_sent
 }
