@@ -1,5 +1,6 @@
 import {
-    timeout, timeoutNotis
+    timeout,
+    timeoutNotis
 } from './main'
 import {
     logGen
@@ -132,5 +133,14 @@ export const getTimestampNotis = (timeout_bool = false) => {
         return cur_ts - timeoutNotis
     } else {
         return cur_ts
+    }
+}
+
+export const getCookie = (user_sent) => {
+    if (!/^SESSDATA=/.test(user_sent)) {
+        user_sent = `SESSDATA=${user_sent}`
+    }
+    if (!/;$/.test(user_sent)) {
+        user_sent = `${user_sent};`
     }
 }
