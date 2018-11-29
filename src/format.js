@@ -136,12 +136,13 @@ export const getTimestampNotis = (timeout_bool = false) => {
     }
 }
 
-export const getCookie = (user_sent) => {
-    if (!/^SESSDATA=/.test(user_sent)) {
-        user_sent = `SESSDATA=${user_sent}`
+export const getCookie = (cookie) => {
+    cookie = cookie.replace(/\s/g, '')
+    if (!/^SESSDATA=/.test(cookie)) {
+        cookie = `SESSDATA=${cookie}`
     }
-    if (!/;$/.test(user_sent)) {
-        user_sent = `${user_sent};`
+    if (!/;$/.test(cookie)) {
+        cookie = `${cookie};`
     }
-    return user_sent
+    return cookie
 }

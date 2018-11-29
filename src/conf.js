@@ -87,6 +87,7 @@ export const createUserInfo = (user, overwrite) => {
 
 export const updateUserCookie = (user, cookie) => {
     let _conf = readConf()
+    cookie = format.getCookie(cookie)
     _conf.user_info[user].cookie = cookie
     writeConf(_conf)
 }
