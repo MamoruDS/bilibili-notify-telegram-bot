@@ -137,6 +137,7 @@ export const getTimestampNotis = (timeout_bool = false) => {
 }
 
 export const getCookie = (cookie) => {
+    if (typeof cookie !== 'string') return undefined
     cookie = cookie.replace(/\s/g, '')
     if (!/^SESSDATA=/.test(cookie)) {
         cookie = `SESSDATA=${cookie}`
