@@ -44,7 +44,7 @@ export const cardStylize = (card_obj, notify_type) => {
             // message with photo
             tgm_obj.route = '/sendPhoto'
             tgm_obj.photo = card_obj.item.pictures.img_src
-            tgm_obj.caption = `${getTagBold('[关注UP 发布动态]')}\n# ${card_obj.user.name}\n${card_obj.item.description}`
+            tgm_obj.caption = `${getTagByName('b','[')} ${getHashTag('关注UP')} ${getHashTag('发布动态')} ${getTagByName('b',']')}\n${getHashTag(card_obj.user.name)}\n${card_obj.item.description}`
             tgm_obj.parse_mode = 'HTML'
             break
 
@@ -52,12 +52,7 @@ export const cardStylize = (card_obj, notify_type) => {
             // message with submit
             tgm_obj.route = '/sendPhoto'
             tgm_obj.photo = card_obj.pic
-            tgm_obj.caption = '<b>[关注UP 投稿视频]</b>\n' +
-                '# ' + card_obj.owner.name +
-                ' <b>投稿</b>：<a href="' + getBilibiliAidUrl(card_obj.aid) + '">' +
-                card_obj.title + '</a>\n' +
-                '<i>' + card_obj.desc + '</i>\n' +
-                dynamicInfoParser(card_obj.dynamic)
+            tgm_obj.caption = `${getTagByName('b', '[')} ${getHashTag('关注UP')} ${getHashTag('投稿视频')} ${getTagByName('b',']')}\n${getHashTag(card_obj.owner.name)} 投稿：${getTagByName('a', card_obj.title, getBilibiliAidUrl(card_obj.aid))}\n${getTagByName('i', card_obj.desc)}\n${dynamicInfoParser(card_obj.dynamic)}`
             tgm_obj.parse_mode = 'HTML'
             break
         case "16":
@@ -66,18 +61,14 @@ export const cardStylize = (card_obj, notify_type) => {
             tgm_obj.video = card_obj.item.video_playurl
             tgm_obj.duration = card_obj.item.video_time
             tgm_obj.thumb = card_obj.item.cover.default
-            tgm_obj.caption = getTagBold("[关注UP 发布小视频]") + '\n' +
-                '# ' + card_obj.user.name + '\n' + card_obj.item.description
+            tgm_obj.caption = `${getTagByName('b', '[')} ${getHashTag('关注UP')} ${getHashTag('发布小视频')} ${getTagByName('b',']')}\n${getHashTag(card_obj.user.name)}\n${card_obj.item.description}`
             tgm_obj.parse_mode = 'HTML'
             break
         case "512":
             // bangumi update
             tgm_obj.route = '/sendPhoto'
             tgm_obj.photo = card_obj.cover
-            tgm_obj.caption = '<b>[番剧更新]</b>\n' +
-                '# ' + card_obj.apiSeasonInfo.title + '\n' +
-                '<b>第' + card_obj.index + '话</b> ' +
-                '<a href="' + card_obj.url + '">' + card_obj.index_title + '</a>'
+            tgm_obj.caption = `${getTagByName('b','[')} ${getHashTag('番剧更新')} ${getTagByName('b',']')}\n${getHashTag(card_obj.apiSeasonInfo.title)}\n${getTagByName('b',`第${card_obj.index}话`)} ${getTagByName('a',card_obj.index_title,card_obj.url)}`
             tgm_obj.parse_mode = 'HTML'
             break
     }
@@ -92,7 +83,7 @@ export const dynamicInfoParser = (d_info) => {
         d_info_str = d_info.replace(re, '')
         for (let i = 0; i < links.length; i++) {
             let tagName = links[i].replace(/^\#/g, '@').replace('\#', '')
-            d_info_str += ' ' + getTagA(getBilibiliTagUrl(tagName.replace('@', '')), tagName)
+            d_info_str += ' ' + getTagByName('a', tagName, getBilibiliTagUrl(tagName.replace('@', '')))
         }
     }
     return d_info_str
@@ -106,16 +97,15 @@ export const getBilibiliTagUrl = (tagName) => {
     return `https://www.bilibili.com/tag/name/${tagName}/feed`
 }
 
-export const getTagA = (url, value) => {
-    return `<a href="${url}">${value}</a>`
+export const getTagByName = (name, value, url) => {
+    return `<${name} href="${url}">${value}</${name}>`
 }
 
-export const getTagBold = (value) => {
-    return `<b>${value}</b>`
-}
-
-export const getTagItalic = (value) => {
-    return `<i>${value}</i>`
+export const getHashTag = (tag) => {
+    if (!tag) return 'NaN'
+    tag = tag.replace(/[\ |\.|\-|\|]/g, '_')
+    tag = tag.replace(/[\ |\!|\#|\$|\&|\'|\"|\(|\)|\*|\+|\,|\/|\\|\:|\;|\=|\?|\@\[|\]|\%|\^|\！|\？|\’|\‘|\“|\”|\，|\。|\（|\）|\【|\】]/g, '')
+    return `#${tag}`
 }
 
 export const getTimestamp = (timeout_bool = false) => {
