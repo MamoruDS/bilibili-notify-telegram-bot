@@ -57,7 +57,7 @@ build -t yourname/bilibili-noti-bot .
 ### 通过浏览器查看网页Cookie获取
 - 访问网页版[哔哩哔哩](https://www.bilibili.com)后登录你的账号;
 - 查看域名`bilibili.com`下的Cookie, 具体方法可通过搜索`浏览器 查看 cookie`获取;
-- 查看名字为`SESSDATA`的Cookie项, 复制内容到剪贴板
+- 查看名字为`SESSDATA`的Cookie项, 复制内容到剪贴板
     ```
     f5d83fb1%2C1548472847%2C9127a0c1
     ```
