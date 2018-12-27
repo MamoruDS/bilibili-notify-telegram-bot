@@ -141,9 +141,13 @@ export const updateCheck = (last_update_id) => {
                     switch (update_text[0]) {
                         case "/set_cookie":
                             logGen(`'${user}' has post a new cookie.`, 'user')
-                            conf.updateUserCookie(user, update_text[1])
-                            conf.updateUserCookieValid(user, true)
-                            userCookieUpdated(user)
+                            try {
+                                conf.updateUserCookie(user, update_text[1])
+                                conf.updateUserCookieValid(user, true)
+                                userCookieUpdated(user)
+                            } catch (err) {
+                                logGen(`ignored cookie update request from '${user}' which isn't a registered user of conf.json.`, 'info')
+                            }
                             break
                         case "/start":
                             logGen(`'${user}' reset/create profile by bot command.`, 'user')
@@ -172,7 +176,7 @@ export const userCookieExpired = (user, send_to_user) => {
                     params: {
                         chat_id: user,
                         text: '<b>[Cookie已失效]</b>\n请上传新的Cookie。如何获取Cookie请查看' +
-                            format.getTagA('https://github.com/MamoruDS/bilibili-notify-telegram-bot/blob/master/README_CN.md#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96cookie', '文档') +
+                            format.getTagByName('a', '文档', 'https://github.com/MamoruDS/bilibili-notify-telegram-bot/blob/master/README_CN.md#%E5%A6%82%E4%BD%95%E8%8E%B7%E5%8F%96cookie') +
                             '。\n',
                         parse_mode: 'HTML',
                         disable_web_page_preview: true
