@@ -44,7 +44,7 @@ export const cardStylize = (card_obj, notify_type) => {
             // message with photo
             tgm_obj.route = '/sendPhoto'
             tgm_obj.photo = card_obj.item.pictures.img_src
-            tgm_obj.caption = `${getTagByName('b','[')} ${getHashTag('关注UP')} ${getHashTag('发布动态')} ${getTagByName('b',']')}\n${getHashTag(card_obj.user.name)}\n${card_obj.item.description}`
+            tgm_obj.caption = `${getTagByName('b','[')} ${getHashTag('关注UP')} ${getHashTag('发布动态')} ${getTagByName('b',']')}\n${getHashTag(card_obj.user.name)}\n${card_obj.item.description}\n${getTagByName('a', `@${card_obj.owner.name}`, getBilibiliSpaceUrl(card_obj.owner.mid))}`
             tgm_obj.parse_mode = 'HTML'
             break
 
@@ -52,7 +52,7 @@ export const cardStylize = (card_obj, notify_type) => {
             // message with submit
             tgm_obj.route = '/sendPhoto'
             tgm_obj.photo = card_obj.pic
-            tgm_obj.caption = `${getTagByName('b', '[')} ${getHashTag('关注UP')} ${getHashTag('投稿视频')} ${getTagByName('b',']')}\n${getHashTag(card_obj.owner.name)} 投稿：${getTagByName('a', card_obj.title, getBilibiliAidUrl(card_obj.aid))}\n${getTagByName('i', card_obj.desc)}\n${dynamicInfoParser(card_obj.dynamic)}`
+            tgm_obj.caption = `${getTagByName('b', '[')} ${getHashTag('关注UP')} ${getHashTag('投稿视频')} ${getTagByName('b',']')}\n${getHashTag(card_obj.owner.name)} 投稿：${getTagByName('a', card_obj.title, getBilibiliAidUrl(card_obj.aid))}\n${getTagByName('i', card_obj.desc)}\n${dynamicInfoParser(card_obj.dynamic)}\n${getTagByName('a', `@${card_obj.owner.name}`, getBilibiliSpaceUrl(card_obj.owner.mid))}`
             tgm_obj.parse_mode = 'HTML'
             break
         case "16":
@@ -61,7 +61,7 @@ export const cardStylize = (card_obj, notify_type) => {
             tgm_obj.video = card_obj.item.video_playurl
             tgm_obj.duration = card_obj.item.video_time
             tgm_obj.thumb = card_obj.item.cover.default
-            tgm_obj.caption = `${getTagByName('b', '[')} ${getHashTag('关注UP')} ${getHashTag('发布小视频')} ${getTagByName('b',']')}\n${getHashTag(card_obj.user.name)}\n${card_obj.item.description}`
+            tgm_obj.caption = `${getTagByName('b', '[')} ${getHashTag('关注UP')} ${getHashTag('发布小视频')} ${getTagByName('b',']')}\n${getHashTag(card_obj.user.name)}\n${card_obj.item.description}\n${getTagByName('a', `@${card_obj.owner.name}`, getBilibiliSpaceUrl(card_obj.owner.mid))}`
             tgm_obj.parse_mode = 'HTML'
             break
         case "512":
