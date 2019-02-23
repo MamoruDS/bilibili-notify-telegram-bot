@@ -68,7 +68,7 @@ export const cardStylize = (card_obj, notify_type) => {
             // bangumi update
             tgm_obj.route = '/sendPhoto'
             tgm_obj.photo = card_obj.cover
-            tgm_obj.caption = `${getTagByName('b','[')} ${getHashTag('番剧更新')} ${getTagByName('b',']')}\n${getHashTag(card_obj.apiSeasonInfo.title)}\n${getTagByName('b',`第${card_obj.index}话`)} ${getTagByName('a',card_obj.index_title,card_obj.url)}`
+            tgm_obj.caption = `${getTagByName('b','[')} ${getHashTag('番剧更新')} ${getTagByName('b',']')}\n${getHashTag(card_obj.apiSeasonInfo.title)}\n${getTagByName('b',`第${card_obj.index}话`)} ${getTagByName('a',card_obj.index_title,card_obj.url)}\n${getTagByName('a', `@${card_obj.apiSeasonInfo.title}`, getBilibiliSpaceUrl(card_obj.apiSeasonInfo.season_id))}`
             tgm_obj.parse_mode = 'HTML'
             break
     }
