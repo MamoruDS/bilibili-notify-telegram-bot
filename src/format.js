@@ -93,6 +93,10 @@ export const getBilibiliSpaceUrl = (mid) => {
     return `https://space.bilibili.com/${mid}`
 }
 
+export const getBilibiliSeasonUrl = (seasonId) => {
+    return `https://bangumi.bilibili.com/anime/${seasonId}`
+}
+
 export const getBilibiliAidUrl = (aid) => {
     return `https://www.bilibili.com/video/av${aid}`
 }
