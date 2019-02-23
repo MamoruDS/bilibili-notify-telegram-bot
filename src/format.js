@@ -89,6 +89,10 @@ export const dynamicInfoParser = (d_info) => {
     return d_info_str
 }
 
+export const getBilibiliSpaceUrl = (mid) => {
+    return `https://space.bilibili.com/${mid}`
+}
+
 export const getBilibiliAidUrl = (aid) => {
     return `https://www.bilibili.com/video/av${aid}`
 }
