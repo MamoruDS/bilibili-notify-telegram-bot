@@ -18,7 +18,7 @@ export const writeConf = (data) => {
         data = {
             user_info: {},
             update_id: 0,
-            bot_token: undefined
+            bot_token: 'token'
         }
         logGen('default conf.json has been ganerated.', 'info')
     }
