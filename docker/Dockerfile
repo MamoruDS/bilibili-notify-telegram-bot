@@ -1,4 +1,5 @@
 FROM node:11-alpine
+ARG CACHE_DATE=1551455126
 RUN apk add --no-cache git
 
 ENV conf /app/cfg/conf.json
