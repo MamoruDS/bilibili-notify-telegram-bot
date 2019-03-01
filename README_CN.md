@@ -22,15 +22,15 @@ npm run compile
 npm run start
 ```
 ### 通过Docker镜像
-Use our image on docker store. [Here](https://store.docker.com/community/images/mamoruio/bilibili-noti-bot) is the image's page.
+镜像在Docker Store的[页面](https://store.docker.com/community/images/mamoruio/bilibili-noti-bot).
 ```shell
 docker pull mamoruio/bilibili-noti-bot:latest
 docker run -d -t --name bilibili-noti-bot -v /mnt/cfg:/app/cfg mamoruio/bilibili-noti-bot:latest
 ```
 #### Build Dockerfile
-```
+```shell
 git clone https://github.com/MamoruDS/bilibili-notify-telegram-bot.git && cd bilibili-notify-telegram-bot
-build -t yourname/bilibili-noti-bot .
+docker build -t yourname/bilibili-noti-bot .
 ```
 
 ## 如何使用Bot

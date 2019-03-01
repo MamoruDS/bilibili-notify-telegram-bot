@@ -8,20 +8,21 @@ A Telegram bilibili-noti forwarding bot base on bilibili's web API.
 ## How to use
 ### via node
 ```shell
-git clone https://github.com/MamoruDS/bilibili-notify-telegram-bot.git && bilibili-notify-telegram-bot
+git clone https://github.com/MamoruDS/bilibili-notify-telegram-bot.git && cd bilibili-notify-telegram-bot
 npm install
-node main
+npm run compile
+npm run start
 ```
 ### via docker
 Use our image on docker store. [Here](https://store.docker.com/community/images/mamoruio/bilibili-noti-bot) is the image's page.
 ```shell
-docker pull mamoruio/bilibili-noti-bot
-docker run -d -t --name bilibili-noti-bot -v /mnt/cfg/file:/app/cfg mamoruio/bilibili-noti-bot
+docker pull mamoruio/bilibili-noti-bot:latest
+docker run -d -t --name bilibili-noti-bot -v /mnt/cfg:/app/cfg mamoruio/bilibili-noti-bot:latest
 ```
 #### build from Dockerfile
 ```
-git clone https://github.com/MamoruDS/bilibili-notify-telegram-bot.git && bilibili-notify-telegram-bot
-build -t yourname/bilibili-noti-bot .
+git clone https://github.com/MamoruDS/bilibili-notify-telegram-bot.git && cd bilibili-notify-telegram-bot
+docker build -t yourname/bilibili-noti-bot .
 ```
 
 ## How to get Cookie
@@ -37,7 +38,7 @@ We need to provide a cookie called `SESSDATA` for using this API. Since this `SE
     ```
 - Send set cookie command with your `SESSDATA` info;
     ```
-    /setCookie SESSDATA=ea56c6%34C14155%C46a257;
+    /set_cookie SESSDATA=ea56c6%34C14155%C46a257;
     ```
 - Wait for bot's response.
 ### via MitM
