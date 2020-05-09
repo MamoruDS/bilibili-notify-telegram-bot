@@ -8,13 +8,14 @@ export const safeMDv2 = (input: string): string => {
     )
 }
 
-export const safeTag = (input: string): string => {
+export const safeTag = (input: string, nonMD?: boolean): string => {
     input = input.replace(/[\ |\.|\-|\|]/gm, '_')
     input = input.replace(
         /[\ |\!|\#|\$|\&|\'|\"|\(|\)|\*|\+|\,|\/|\\|\:|\;|\=|\?|\@\[|\]|\%|\^|\！|\？|\’|\‘|\“|\”|\，|\。|\（|\）|\【|\】]/gm,
         ''
     )
-    return '#' + input
+    const output = '#' + input
+    return nonMD ? output : safeMDv2(output)
 }
 
 export const stringFormatter = (
@@ -27,5 +28,13 @@ export const stringFormatter = (
         } else {
             return params[M[0]]
         }
+    })
+}
+
+export const wait = async (timeout: number): Promise<void> => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve()
+        }, timeout)
     })
 }
