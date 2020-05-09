@@ -62,7 +62,6 @@ typings/
 
 package-lock.json
 dist/
-test/
 
 sample/
 data/
