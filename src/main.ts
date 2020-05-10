@@ -1,6 +1,7 @@
 import { BotUtils } from 'telegram-bot-utils/dist/bot'
 import { readFileSync } from 'fs'
 import { Client } from 'cchook'
+import * as moment from 'moment-timezone'
 
 import { safeMDv2, safeTag, stringFormatter, wait } from './utils'
 import { API, CardInfoParsed } from './request'
@@ -35,6 +36,10 @@ const OPT = {
             str: 'bilibili_notif_stop',
             description: '',
         },
+        status: {
+            str: 'bilibili_notif_status',
+            description: '',
+        },
     },
     tasks: {
         getUpdate: {
@@ -42,6 +47,8 @@ const OPT = {
             description: 'Fetch update from bilibili API',
         },
     },
+    momentLocale: 'en',
+    momentTimezone: 'Asia/Shanghai',
     text: {
         titleSESSDATAMissing: '*\\[ SESSDATA Not Found \\]*',
         titleSESSDATAinvalid: '*\\[ SESSDATA Invalid \\]*',
@@ -56,6 +63,10 @@ const OPT = {
             '${_} 403b3c2a%bC1601334589%2C9c817*51',
             '```',
         ].join('\n'),
+        fetchSuccess: '`SESSDATA` fetch success',
+        lastUpdate: 'Last update at: ',
+        lastStart: 'Started since: ',
+        lastStop: 'Stopped since: ',
         userMention: 'This script only for user: ',
         version: 'version: ',
         taskAlreadyStarted: 'Task already runing.',
@@ -127,6 +138,7 @@ const taskStart = (bot: BotUtils, chatId: number, userId: number): string => {
         chat_id: chatId,
     })
     userData.set(taskId, ['task_id'])
+    userData.set(Date.now(), ['task_start_at'])
     bot.api.sendMessage(chatId, [OPT.text.taskStarted].join('\n'))
     return taskId
 }
@@ -139,12 +151,14 @@ const taskStop = (bot: BotUtils, chatId: number, userId: number): void => {
     const taskId = bot.task.record.renewId(userData.get(['task_id']))
     bot.task.record.delete(taskId)
     userData.set(undefined, ['task_id'])
+    userData.set(Date.now(), ['task_stop_at'])
     bot.api.sendMessage(chatId, [OPT.text.taskStopped].join('\n'))
     return
 }
 
 const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
     assign(OPT, options)
+    moment.locale(OPT.momentLocale)
     bot.application.add(OPT.name, {
         is_group_need_bind: true,
         data_bind_with_chat: false,
@@ -198,7 +212,7 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
                 taskStop(bot, inf.data.chat_id, inf.data.user_id)
                 return
             }
-
+            userData.set(Date.now(), ['task_update_at'])
             for (const card of cards) {
                 if (card.post_ts <= (userData.get(['latest_ts']) || 999)) {
                     continue
@@ -349,13 +363,100 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
         },
         {
             filter: 'public',
+            description: OPT.commands.stop.description,
+        },
+        {
+            application_name: OPT.name,
+        }
+    )
+    // bot.inlineKYBD.add() TODO:
+    bot.command.add(
+        OPT.commands.status.str,
+        (inf) => {
+            const userData = inf.data.user_data
+            const msg_a = [
+                `${OPT.text.lastUpdate}${moment(
+                    userData.get(['task_update_at']) || 0
+                )
+                    .tz(OPT.momentTimezone)
+                    .fromNow()}`,
+            ]
+            if (userData.get(['task_id'])) {
+                msg_a.push(
+                    `${OPT.text.lastStart}${moment(
+                        userData.get(['task_start_at']) || 0
+                    )
+                        .tz(OPT.momentTimezone)
+                        .fromNow()}`
+                )
+            } else {
+                msg_a.push(
+                    `${OPT.text.lastStop}${moment(
+                        userData.get(['task_stop_at']) || 0
+                    )
+                        .tz(OPT.momentTimezone)
+                        .fromNow()}`
+                )
+            }
+            bot.api.sendMessage(inf.data.chat_id, msg_a.join('\n'), {
+                parse_mode: 'MarkdownV2',
+            })
+        },
+        {
+            filter: 'public',
+            description: OPT.commands.status.description,
         },
         {
             application_name: OPT.name,
         }
     )
     bot.event.on('ready', () => {
-        //
+        if (OPT.hookCliOptions.enable) {
+            const cli = new Client({
+                user: OPT.hookCliOptions.user,
+                address: OPT.hookCliOptions.address,
+                port: OPT.hookCliOptions.port,
+                password: OPT.hookCliOptions.password,
+            })
+            cli.start()
+            cli.on('request', (o) => {
+                //
+            })
+            cli.action.on(OPT.hookCliOptions.action, (data) => {
+                const _data = { ...data } as {
+                    request: {
+                        body: {
+                            [key: string]: string | number | boolean | null
+                        }
+                        headers: {
+                            [key: string]: string
+                        }
+                    }
+                }
+                const sessdata = _data.request.body['sessdata']
+                const userId = _data.request.body['user_id']
+                if (typeof userId !== 'number') {
+                    return
+                }
+                const userData = bot.application.get(OPT.name).dataMan({
+                    user_id: userId,
+                })
+                userData.set(sessdata, ['sessdata'])
+                bot.api.sendMessage(
+                    userId, // TODO: replace with chat id
+                    OPT.text.fetchSuccess,
+                    {
+                        parse_mode: 'MarkdownV2',
+                    }
+                )
+                if (userData.get(['task_id'])) {
+                    return
+                } else {
+                    taskStart(bot, userId, userId)
+                    // TODO: replace with chat id
+                }
+            })
+        }
     })
 }
 
