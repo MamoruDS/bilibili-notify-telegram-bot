@@ -7,10 +7,12 @@ import { safeMDv2, safeTag, stringFormatter, wait } from './utils'
 import { API, CardInfoParsed } from './request'
 import * as bilibili from './bilibili'
 
-const OPT = {
+export const OPT = {
     name: 'bilibili-notify',
     interval: 300000,
     scriptPath: './script/bilibili_sessdata.js',
+    logPath: './logs',
+    logAPIErrRes: true,
     hookCliOptions: {
         enable: false,
         user: 'USERID',

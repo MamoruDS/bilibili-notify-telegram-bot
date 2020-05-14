@@ -2,6 +2,8 @@ import axios from 'axios'
 
 import { jsonstr, Url, TIMESTAMP } from './type'
 
+import { OPT as options } from './main'
+import { save2file } from './log'
 import * as bilibili from './bilibili'
 const BilibiliAPIURL = 'https://api.vc.bilibili.com'
 
@@ -115,6 +117,7 @@ export class API {
             const updates = await this._getUpdates(typeFilter)
             if (updates.code != 0) {
                 res.apiErr = true
+                if (options.logAPIErrRes) save2file(updates)
             } else {
                 const _cards = updates.data.cards
                 for (const _c of _cards) {
