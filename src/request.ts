@@ -106,17 +106,26 @@ export class API {
     ): Promise<{
         networkErr: boolean
         apiErr: boolean
+        unknownErr: boolean
+        raw: bilibili.Updates
         cards: CardInfoParsed[]
     }> {
         const res = {
             networkErr: false,
             apiErr: false,
+            unknownErr: false,
+            raw: {} as bilibili.Updates,
             cards: [] as CardInfoParsed[],
         }
         try {
             const updates = await this._getUpdates(typeFilter)
+            res.raw = updates
             if (updates.code != 0) {
-                res.apiErr = true
+                if (updates.code == -8) {
+                    res.unknownErr = true
+                } else {
+                    res.apiErr = true
+                }
                 if (options.logAPIErrRes) save2file(updates)
             } else {
                 const _cards = updates.data.cards

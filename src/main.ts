@@ -54,6 +54,7 @@ export const OPT = {
     text: {
         titleSESSDATAMissing: '*\\[ SESSDATA Not Found \\]*',
         titleSESSDATAinvalid: '*\\[ SESSDATA Invalid \\]*',
+        titleSESSDATAUnknownERR: '*\\[ SESSDATA Unknown Error \\]*',
         titleARGUMENTMissing: '*\\[ ARGUMENT MISSING \\]*',
         updateSESSDATAWithCmd:
             '1⃣️ Update sessdata with command\n${_}\nlearn how to get `SESSDATA` manually with [page](https://github.com/MamoruDS/bilibili-notify-telegram-bot/blob/master/README.md#how-to-get-cookie)\\.',
@@ -82,6 +83,7 @@ export const OPT = {
         tag512: 'Bangumi_Update',
         episode: 'Episode: ${_}',
         episodeUnknown: '??',
+        rawResponse: 'raw_response',
     },
     _bilibiliSpace: 'https://space.bilibili.com/${_}',
     _bilibiliVideo: 'https://www.bilibili.com/video/${_}',
@@ -193,7 +195,10 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
             }
 
             const types = userData.get(['filter']) || [8, 512]
-            const { apiErr, cards } = await getCards(sessdata, types)
+            const { apiErr, unknownErr, raw, cards } = await getCards(
+                sessdata,
+                types
+            )
             if (apiErr) {
                 bot.api.sendMessage(
                     inf.data.chat_id,
@@ -212,6 +217,19 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
                     }
                 )
                 taskStop(bot, inf.data.chat_id, inf.data.user_id)
+                return
+            }
+            if (unknownErr) {
+                bot.api.sendDocument(
+                    inf.data.chat_id,
+                    Buffer.from(JSON.stringify(raw)),
+                    {
+                        caption: [OPT.text.titleSESSDATAUnknownERR].join('/n'),
+                    },
+                    {
+                        filename: OPT.text.rawResponse + '.txt',
+                    }
+                )
                 return
             }
             userData.set(Date.now(), ['task_update_at'])
