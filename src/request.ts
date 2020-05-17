@@ -107,21 +107,28 @@ export class API {
         networkErr: boolean
         apiErr: boolean
         unknownErr: boolean
-        raw: bilibili.Updates
+        raw: object | string
         cards: CardInfoParsed[]
     }> {
         const res = {
             networkErr: false,
             apiErr: false,
             unknownErr: false,
-            raw: {} as bilibili.Updates,
+            raw: {},
             cards: [] as CardInfoParsed[],
         }
         try {
-            const updates = await this._getUpdates(typeFilter)
-            res.raw = updates
+            res.raw = await this._getUpdates(typeFilter)
+            const updates: bilibili.Updates =
+                typeof res.raw == 'object'
+                    ? res.raw
+                    : typeof res.raw == 'string'
+                    ? JSON.parse(res.raw)
+                    : { code: -999999, localMsg: 'parse failed' }
             if (updates.code != 0) {
                 if (updates.code == -8) {
+                    res.unknownErr = true
+                } else if (updates.code == -999999) {
                     res.unknownErr = true
                 } else {
                     res.apiErr = true

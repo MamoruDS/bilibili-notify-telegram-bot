@@ -222,9 +222,12 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
             if (unknownErr) {
                 bot.api.sendDocument(
                     inf.data.chat_id,
-                    Buffer.from(JSON.stringify(raw)),
+                    Buffer.from(
+                        typeof raw == 'object' ? JSON.stringify(raw) : raw
+                    ),
                     {
                         caption: [OPT.text.titleSESSDATAUnknownERR].join('/n'),
+                        parse_mode: 'MarkdownV2',
                     },
                     {
                         filename: OPT.text.rawResponse + '.txt',

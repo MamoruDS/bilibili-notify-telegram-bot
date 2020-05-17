@@ -359,7 +359,7 @@ type Relation = {
 }
 
 export type Updates = {
-    code: 0 | -6 | -8| 500003
+    code: 0 | -6 | -8 | 500003 | -999999
     msg: string
     message: string
     data: {
