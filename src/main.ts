@@ -13,6 +13,7 @@ export const OPT = {
     scriptPath: './script/bilibili_sessdata.js',
     logPath: './logs',
     logAPIErrRes: true,
+    sendLogToUser: false,
     hookCliOptions: {
         enable: false,
         user: 'USERID',
@@ -195,7 +196,7 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
             }
 
             const types = userData.get(['filter']) || [8, 512]
-            const { apiErr, unknownErr, raw, cards } = await getCards(
+            const { apiErr, unknownErr, skip, raw, cards } = await getCards(
                 sessdata,
                 types
             )
@@ -219,7 +220,7 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
                 taskStop(bot, inf.data.chat_id, inf.data.user_id)
                 return
             }
-            if (unknownErr) {
+            if (unknownErr && OPT.sendLogToUser) {
                 bot.api.sendDocument(
                     inf.data.chat_id,
                     Buffer.from(
@@ -233,6 +234,8 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
                         filename: OPT.text.rawResponse + '.txt',
                     }
                 )
+            }
+            if (skip) {
                 return
             }
             userData.set(Date.now(), ['task_update_at'])

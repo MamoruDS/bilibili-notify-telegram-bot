@@ -107,6 +107,7 @@ export class API {
         networkErr: boolean
         apiErr: boolean
         unknownErr: boolean
+        skip: boolean
         raw: object | string
         cards: CardInfoParsed[]
     }> {
@@ -114,6 +115,7 @@ export class API {
             networkErr: false,
             apiErr: false,
             unknownErr: false,
+            skip: false,
             raw: {},
             cards: [] as CardInfoParsed[],
         }
@@ -128,8 +130,12 @@ export class API {
             if (updates.code != 0) {
                 if (updates.code == -8) {
                     res.unknownErr = true
+                    res.skip = true
+                } else if (updates.code == 500201) {
+                    res.skip = true
                 } else if (updates.code == -999999) {
                     res.unknownErr = true
+                    res.skip = true
                 } else {
                     res.apiErr = true
                 }
