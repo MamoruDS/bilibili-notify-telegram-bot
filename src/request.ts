@@ -151,6 +151,10 @@ export class API {
                         // 1 origin.bvid
                         _card.bvid = _c.desc.bvid
                         _card.post_ts = _c.desc.timestamp * 1000 || Date.now()
+                        if (_t == 8) {
+                            _card.user_name = _c.desc.user_profile.info.uname
+                            _card.user_id = _c.desc.user_profile.info.uid
+                        }
                         res.cards.unshift(_card)
                     }
                 }

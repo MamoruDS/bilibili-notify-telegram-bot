@@ -104,6 +104,7 @@ type Card = {
         emoji_info: {
             emoji_details?: []
         }
+        usr_action_txt: string
         relation: Relation
     }
 }
