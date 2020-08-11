@@ -44,6 +44,11 @@ export const OPT = {
             description: '',
         },
     },
+    messageActions: {
+        updateSESSDATA: {
+            name: 'bilibili_notif_update_sessdata',
+        },
+    },
     tasks: {
         getUpdate: {
             str: 'getUpdate',
@@ -67,6 +72,7 @@ export const OPT = {
             '${_} 403b3c2a%bC1601334589%2C9c817*51',
             '```',
         ].join('\n'),
+        updateWaiting: 'Waiting for input ...',
         fetchSuccess: '`SESSDATA` fetch success',
         lastUpdate: 'Last update at: ',
         lastStart: 'Started since: ',
@@ -341,6 +347,23 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
             application_name: OPT.name,
         }
     )
+    bot.messageAction.add(
+        OPT.messageActions.updateSESSDATA.name,
+        async (inf) => {
+            const SESSDATA = inf.message.text
+            inf.data.user_data.set(SESSDATA, ['sessdata'])
+            taskStart(bot, inf.message.chat.id, inf.message.from.id)
+            return true
+        },
+        {
+            max_exec_counts: 1,
+            pass_to_other_action: false,
+            pass_to_command: false,
+        },
+        {
+            application_name: OPT.name,
+        }
+    )
     bot.command.add(
         OPT.commands.update.str,
         (inf) => {
@@ -359,15 +382,15 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
             argument_error_function: (msg) => {
                 bot.api.sendMessage(
                     msg.chat.id,
-                    [
-                        OPT.text.titleARGUMENTMissing,
-                        stringFormatter(OPT.text.updateFormat, [
-                            safeMDv2('/' + OPT.commands.update.str),
-                        ]),
-                    ].join('\n'),
+                    [safeMDv2(OPT.text.updateWaiting)].join('\n'),
                     {
                         parse_mode: 'MarkdownV2',
                     }
+                )
+                bot.messageAction.new(
+                    OPT.messageActions.updateSESSDATA.name,
+                    msg.chat.id,
+                    msg.from.id
                 )
             },
         },
