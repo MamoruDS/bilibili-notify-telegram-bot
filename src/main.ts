@@ -95,6 +95,8 @@ export const OPT = {
         episode: 'Episode: ${_}',
         episodeUnknown: '??',
         rawResponse: 'raw_response',
+        debug_resend:
+            '[DEBUG] Resend ${_} historical notifications on next update',
     },
     _bilibiliSpace: 'https://space.bilibili.com/${_}',
     _bilibiliVideo: 'https://www.bilibili.com/video/${_}',
@@ -168,6 +170,18 @@ const taskStop = (bot: BotUtils, chatId: number, userId: number): void => {
     userData.set(undefined, ['task_id'])
     userData.set(Date.now(), ['task_stop_at'])
     bot.api.sendMessage(chatId, [OPT.text.taskStopped].join('\n'))
+    return
+}
+
+const taskExec = (bot: BotUtils, chatId: number, userId: number): void => {
+    const userData = bot.app.get(OPT.name).dataMan({
+        user_id: userId,
+        chat_id: chatId,
+    })
+    const taskId = bot.task.record.renewId(userData.get(['task_id']))
+    if (taskId) {
+        bot.task.forceExec(taskId)
+    }
     return
 }
 
@@ -259,13 +273,12 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
             while (true) {
                 const card = cards[i]
                 if (typeof card == 'undefined') {
-                    if (ignoreTs) {
-                        break
-                    } else if (!ignoreTs && resendCount) {
+                    if (!ignoreTs && resendCount) {
                         ignoreTs = true
                         i -= resendCount
                         continue
                     }
+                    break
                 }
                 if (ignoreTs) {
                     //
@@ -500,6 +513,11 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
             const args = inf.arguments
             const count = args[1]
             userData.set(count, ['task_resend'])
+            taskExec(bot, inf.data.chat_id, inf.data.user_id)
+            bot.api.sendMessage(
+                inf.data.chat_id,
+                `${stringFormatter(OPT.text.debug_resend, [count])}`
+            )
         },
         {
             filter: 'public',
