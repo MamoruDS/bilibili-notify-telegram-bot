@@ -9,11 +9,10 @@ export const safeMDv2 = (input: string): string => {
 }
 
 export const safeTag = (input: string, nonMD?: boolean): string => {
-    input = input.replace(/[\ |\.|\-|\|]/gm, '_')
-    input = input.replace(
-        /[\ |\!|\#|\$|\&|\'|\"|\(|\)|\*|\+|\,|\/|\\|\:|\;|\=|\?|\@\[|\]|\%|\^|\！|\？|\’|\‘|\“|\”|\，|\。|\（|\）|\【|\】]/gm,
-        ''
-    )
+    input = input.replace(/[\ |\.|\-|\|:|：]/gm, '_')
+    input = input.replace(/[\uff00-\uffff|\u0000-\u00ff]/g, (m: string) => {
+        return /\w/.exec(m) == null ? '' : m
+    })
     const output = '#' + input
     return nonMD ? output : safeMDv2(output)
 }
