@@ -248,19 +248,42 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
             if (skip) {
                 return
             }
+
             let resendCount = userData.get(['task_resend']) || 0
+
             userData.set(Date.now(), ['task_update_at'])
             userData.set(undefined, ['task_resend'])
-            for (const card of cards) {
-                if (card.post_ts <= (userData.get(['latest_ts']) || 999)) {
-                    if (resendCount > 0) {
-                        resendCount--
-                    } else {
+
+            let i = 0
+            let ignoreTs = false
+            while (true) {
+                const card = cards[i]
+                if (typeof card == 'undefined') {
+                    if (ignoreTs) {
+                        break
+                    } else if (!ignoreTs && resendCount) {
+                        ignoreTs = true
+                        i -= resendCount
                         continue
                     }
-                } else {
-                    userData.set(card.post_ts, ['latest_ts'])
                 }
+                if (ignoreTs) {
+                    //
+                } else {
+                    if (card.post_ts <= (userData.get(['latest_ts']) || 999)) {
+                        i++
+                        continue
+                    } else {
+                        if (resendCount > 0) {
+                            ignoreTs = true
+                            i -= resendCount
+                            continue
+                        }
+                    }
+                }
+
+                userData.set(card.post_ts, ['latest_ts'])
+
                 const caption = messageParser(card)
 
                 if (card.cover_url.length == 0) {
@@ -287,7 +310,8 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
                         })
                     )
                 }
-                await wait(1500)
+                i++
+                await wait(1000)
             }
         },
         OPT.interval,
@@ -483,7 +507,7 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
             argument_check: [
                 {
                     type: 'integer',
-                    default_value: 0,
+                    default_value: 1,
                 },
             ],
             // argument_error_function: () => {},
