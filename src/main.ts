@@ -43,6 +43,10 @@ export const OPT = {
             str: 'bilibili_notif_status',
             description: '',
         },
+        debug_resend: {
+            str: 'bilibili_debug_resend',
+            description: '',
+        },
     },
     messageActions: {
         updateSESSDATA: {
@@ -244,10 +248,16 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
             if (skip) {
                 return
             }
+            let resendCount = userData.get(['task_resend']) || 0
             userData.set(Date.now(), ['task_update_at'])
+            userData.set(undefined, ['task_resend'])
             for (const card of cards) {
                 if (card.post_ts <= (userData.get(['latest_ts']) || 999)) {
-                    continue
+                    if (resendCount > 0) {
+                        resendCount--
+                    } else {
+                        continue
+                    }
                 } else {
                     userData.set(card.post_ts, ['latest_ts'])
                 }
@@ -454,6 +464,29 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
         {
             filter: 'public',
             description: OPT.commands.status.description,
+        },
+        {
+            application_name: OPT.name,
+        }
+    )
+    bot.command.add(
+        OPT.commands.debug_resend.str,
+        async (inf) => {
+            const userData = inf.data.user_data
+            const args = inf.arguments
+            const count = args[1]
+            userData.set(count, ['task_resend'])
+        },
+        {
+            filter: 'public',
+            description: OPT.commands.debug_resend.description,
+            argument_check: [
+                {
+                    type: 'integer',
+                    default_value: 0,
+                },
+            ],
+            // argument_error_function: () => {},
         },
         {
             application_name: OPT.name,
