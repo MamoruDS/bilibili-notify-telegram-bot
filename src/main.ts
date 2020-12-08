@@ -109,6 +109,21 @@ const getCards = async (sessdata: string, type?: bilibili.PostType[]) => {
     return await _a.getCards(type)
 }
 
+type Filter<T> = {
+    blacklist?: T[]
+    whitelist?: T[]
+}
+
+type CardFilter = {
+    ids: Filter<number>
+    keywords: Filter<string>
+}
+
+const cardFilter = (card: CardInfoParsed, filter: CardFilter): boolean => {
+    // TODO:
+    return false
+}
+
 const messageParser = (card: CardInfoParsed): string => {
     if (card.type) {
         if (card.type == 8)
