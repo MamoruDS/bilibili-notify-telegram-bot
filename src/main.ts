@@ -121,7 +121,29 @@ type CardFilter = {
 
 const cardFilter = (card: CardInfoParsed, filter: CardFilter): boolean => {
     // TODO:
-    return false
+    if (typeof filter != 'undefined') {
+        if (typeof filter['ids'] != 'undefined') {
+            const ids = filter['ids']['blacklist']
+            if (ids.indexOf(card.user_id) != -1) {
+                return false
+            }
+        }
+        if (typeof filter['keywords'] != 'undefined') {
+            const keywords = filter['keywords']['blacklist']
+            for (const keyword of keywords) {
+                if (card.title && card.title.indexOf(keyword) != -1) {
+                    return false
+                }
+                if (
+                    card.description &&
+                    card.description.indexOf(keyword) != -1
+                ) {
+                    return false
+                }
+            }
+        }
+    }
+    return true
 }
 
 const messageParser = (card: CardInfoParsed): string => {
@@ -314,6 +336,8 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
 
                 const caption = messageParser(card)
 
+                if (!cardFilter(card, userData.get(['filters']))) return
+
                 if (card.cover_url.length == 0) {
                     bot.api.sendMessage(inf.data.chat_id, caption, {
                         parse_mode: 'MarkdownV2',
@@ -368,7 +392,7 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
                 taskStart(bot, inf.message.chat.id, inf.message.from.id)
             }
         },
-        { filter: 'public' },
+        { description: OPT.commands.start.description, filter: 'public' },
         {
             application_name: OPT.name,
         }
