@@ -1,6 +1,7 @@
 import { BotUtils } from 'telegram-bot-utils/dist/bot'
 import { readFileSync } from 'fs'
 import { Client } from 'cchook'
+import { RuleEngine, Rule, RuleFnMap } from 'ms-rules'
 import * as moment from 'moment-timezone'
 
 import { safeMDv2, safeTag, stringFormatter, wait } from './utils'
@@ -109,41 +110,50 @@ const getCards = async (sessdata: string, type?: bilibili.PostType[]) => {
     return await _a.getCards(type)
 }
 
-type Filter<T> = {
-    blacklist?: T[]
-    whitelist?: T[]
+type CardRuleType = 'user_id' | 'keyword'
+type CardRuleAct = 'PUSH' | 'HIDE'
+
+const CardRuleFnMap: RuleFnMap<CardRuleType> = {
+    user_id: {
+        fn: (input: CardInfoParsed, value: number) => {
+            return input.user_id == value
+        },
+        valType: 'number',
+        inputType: (input: CardInfoParsed) => {
+            return typeof input?.user_id == 'number'
+        },
+    },
+    keyword: {
+        fn: (input: CardInfoParsed, value: string) => {
+            return (
+                `${input.title || ''} ${input.description || ''}`.indexOf(
+                    value
+                ) != -1
+            )
+        },
+        valType: 'string',
+        inputType: (input: CardInfoParsed) => {
+            return (
+                typeof input?.title == 'string' ||
+                typeof input?.description == 'string'
+            )
+        },
+    },
 }
 
-type CardFilter = {
-    ids: Filter<number>
-    keywords: Filter<string>
-}
-
-const cardFilter = (card: CardInfoParsed, filter: CardFilter): boolean => {
-    // TODO:
-    if (typeof filter != 'undefined') {
-        if (typeof filter['ids'] != 'undefined') {
-            const ids = filter['ids']['blacklist']
-            if (ids.indexOf(card.user_id) != -1) {
-                return false
-            }
-        }
-        if (typeof filter['keywords'] != 'undefined') {
-            const keywords = filter['keywords']['blacklist']
-            for (const keyword of keywords) {
-                if (card.title && card.title.indexOf(keyword) != -1) {
-                    return false
-                }
-                if (
-                    card.description &&
-                    card.description.indexOf(keyword) != -1
-                ) {
-                    return false
-                }
-            }
-        }
+const cardFilter = (
+    card: CardInfoParsed,
+    rules: Rule<CardRuleAct, CardRuleType>[] = []
+): boolean => {
+    const ruleEngine = new RuleEngine<CardRuleAct, CardRuleType>(
+        CardRuleFnMap,
+        'PUSH'
+    )
+    for (const r of rules) {
+        ruleEngine.load(r)
     }
-    return true
+    const act = ruleEngine.exec(card)
+    return act == 'PUSH' ? true : false
 }
 
 const messageParser = (card: CardInfoParsed): string => {
@@ -336,7 +346,7 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
 
                 const caption = messageParser(card)
 
-                if (!cardFilter(card, userData.get(['filters']))) return
+                if (!cardFilter(card, userData.get(['rules']))) return
 
                 if (card.cover_url.length == 0) {
                     bot.api.sendMessage(inf.data.chat_id, caption, {
