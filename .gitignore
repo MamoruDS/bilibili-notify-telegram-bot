@@ -64,5 +64,7 @@ package-lock.json
 dist/
 test/
 
+.vscode/
 sample/
 data/
+temp/

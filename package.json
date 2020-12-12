@@ -1,14 +1,15 @@
 {
     "name": "bilibili-notify-telegram-bot",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "description": "",
     "main": "dist/main.js",
     "dependencies": {
         "axios": "^0.19.2",
         "cchook": "^0.1.5-rc1",
         "moment-timezone": "^0.5.28",
+        "ms-rules": "^1.0.0",
         "node-telegram-bot-api": "^0.40.0",
-        "telegram-bot-utils": "^0.4.2-rc5"
+        "telegram-bot-utils": "^0.4.3-beta.0"
     },
     "devDependencies": {
         "@types/axios": "^0.14.0",
