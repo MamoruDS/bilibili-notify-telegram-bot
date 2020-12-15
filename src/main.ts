@@ -30,28 +30,35 @@ export const OPT = {
         },
         update: {
             str: 'bilibili_sessdata_update',
-            description: '',
+            description: 'Update SESSDATA session info',
         },
         start: {
             str: 'bilibili_notif',
-            description: '',
+            description: 'Start notification service',
         },
         stop: {
             str: 'bilibili_notif_stop',
-            description: '',
+            description: 'Stop notification service',
         },
         status: {
             str: 'bilibili_notif_status',
-            description: '',
+            description: 'Print current status of notification service',
         },
         debug_resend: {
             str: 'bilibili_debug_resend',
-            description: '',
+            description: 'Resend last {?} messages',
+        },
+        upload_rules: {
+            str: 'bilibili_upload_rules',
+            description: 'Upload notification filter rules (in JSON',
         },
     },
     messageActions: {
         updateSESSDATA: {
             name: 'bilibili_notif_update_sessdata',
+        },
+        uploadRules: {
+            name: 'bilibili_upload_rules',
         },
     },
     tasks: {
@@ -98,6 +105,12 @@ export const OPT = {
         rawResponse: 'raw_response',
         debug_resend:
             '[DEBUG] Resend ${_} historical notifications on next update',
+        ruleUploadListener: 'Waiting for rule to be uploaded ...',
+        ruleLoadErr: 'Error occurred when rules were loaded into RuleEngine:',
+        ruleParseErr: 'Can not parse uploaded rules',
+        ruleFormatErr: 'Bad format of uploaded rules',
+        ruleUploadSuccess: 'Rules have been updated',
+        ruleUploadFailed: 'Upload failed.\nRetry with the command /${_}',
     },
     _bilibiliSpace: 'https://space.bilibili.com/${_}',
     _bilibiliVideo: 'https://www.bilibili.com/video/${_}',
@@ -111,7 +124,7 @@ const getCards = async (sessdata: string, type?: bilibili.PostType[]) => {
 }
 
 type CardRuleType = 'user_id' | 'keyword'
-type CardRuleAct = 'PUSH' | 'HIDE'
+type CardRuleAct = 'PUSH' | 'DISCARD'
 
 const CardRuleFnMap: RuleFnMap<CardRuleType> = {
     user_id: {
@@ -152,8 +165,24 @@ const cardFilter = (
     for (const r of rules) {
         ruleEngine.load(r)
     }
-    const act = ruleEngine.exec(card)
-    return act == 'PUSH' ? true : false
+    const { action } = ruleEngine.exec(card)
+    return action == 'PUSH' ? true : false
+}
+
+const cardRulesTest = (
+    rules: Rule<CardRuleAct, CardRuleType>[] = []
+): string[] => {
+    const ruleEngine = new RuleEngine<CardRuleAct, CardRuleType>(
+        CardRuleFnMap,
+        'PUSH'
+    )
+    const errs = []
+    for (const r of rules) {
+        ruleEngine.load(r, false, true).forEach((e) => {
+            errs.push(e)
+        })
+    }
+    return errs
 }
 
 const messageParser = (card: CardInfoParsed): string => {
@@ -346,7 +375,12 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
 
                 const caption = messageParser(card)
 
-                if (!cardFilter(card, userData.get(['rules']))) return
+                const rules = JSON.parse(userData.get(['rules']) || '[]')
+                if (Array.isArray(rules)) {
+                    if (!cardFilter(card, rules)) return
+                } else {
+                    //
+                }
 
                 if (card.cover_url.length == 0) {
                     bot.api.sendMessage(inf.data.chat_id, caption, {
@@ -578,6 +612,66 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
                 },
             ],
             // argument_error_function: () => {},
+        },
+        {
+            application_name: OPT.name,
+        }
+    )
+    bot.messageAction.add(
+        OPT.messageActions.uploadRules.name,
+        async (inf) => {
+            const msg = inf.message
+            let errMsg: string
+            let rules: any
+            try {
+                rules = JSON.parse(msg.text)
+                if (Array.isArray(rules)) {
+                    const errs = cardRulesTest(rules)
+                    if (errs.length) {
+                        errMsg = OPT.text.ruleLoadErr
+                        errMsg += errs.join('\n')
+                    }
+                } else {
+                    errMsg = OPT.text.ruleFormatErr
+                }
+            } catch (e) {
+                if (e instanceof SyntaxError) {
+                    errMsg = OPT.text.ruleParseErr
+                }
+            }
+            if (typeof errMsg == 'undefined') {
+                inf.data.user_data.set(msg.text, ['rules'])
+                bot.api.sendMessage(msg.chat.id, OPT.text.ruleUploadSuccess)
+                return true
+            } else {
+                errMsg += '\n'
+                errMsg += stringFormatter(OPT.text.ruleUploadFailed, [
+                    OPT.commands.upload_rules.str,
+                ])
+                bot.api.sendMessage(msg.chat.id, errMsg)
+            }
+            return false
+        },
+        {
+            max_exec_counts: 1,
+            pass_to_command: false,
+            pass_to_other_action: false,
+        }
+    )
+    bot.command.add(
+        OPT.commands.upload_rules.str,
+        async (inf) => {
+            const msg = inf.message
+            bot.api.sendMessage(msg.chat.id, OPT.text.ruleUploadListener)
+            bot.messageAction.new(
+                OPT.messageActions.uploadRules.name,
+                msg.chat.id,
+                msg.from.id
+            )
+        },
+        {
+            filter: 'public',
+            description: OPT.commands.upload_rules.description,
         },
         {
             application_name: OPT.name,
