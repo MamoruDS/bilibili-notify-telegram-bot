@@ -17,19 +17,7 @@ Deploy with [telegram_bot_utils](https://github.com/MamoruDS/telegram_bot_utils)
 ```javascript
 const bot = BotUtils.bots.get('yourbot') // telegram-bot-utils instance
 
-bilibiliNotif.run(bot, {
-        scriptPath: './script/bilibili_script.js',
-        hookCliOptions: {
-            enable: true,
-            user: 'USER-ID',
-            address: 'http://hook.server.com',
-            port: 8030,
-            password: 'password',
-        },
-        momentLocale: 'zh-cn',
-    }
-})
-
+bilibiliNotif.run(bot)
 ```
 
 ## How to get Cookie
@@ -53,3 +41,7 @@ We need to provide a cookie called `SESSDATA` for using this API. Since this `SE
 -   Wait for bot's response.
 
 ### via MitM tools
+
+## License
+
+MIT © MamoruDS

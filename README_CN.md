@@ -18,14 +18,6 @@ npm i bilibili-notify-telegram-bot
 const bot = BotUtils.bots.get('yourbot') // telegram-bot-utils instance
 
 bilibiliNotif.run(bot, {
-        scriptPath: './script/bilibili_script.js',
-        hookCliOptions: {
-            enable: true,
-            user: 'USER-ID',
-            address: 'http://hook.server.com',
-            port: 8030,
-            password: 'password',
-        },
         momentLocale: 'zh-cn',
         text: {
             titleSESSDATAMissing: '*\\[ SESSDATA 不存在 \\]*',
@@ -89,3 +81,7 @@ bilibiliNotif.run(bot, {
     ```
 
 ### 通过 MITM 工具
+
+## License
+
+MIT © MamoruDS
