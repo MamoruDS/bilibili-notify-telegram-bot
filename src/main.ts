@@ -123,8 +123,9 @@ const getCards = async (sessdata: string, type?: bilibili.PostType[]) => {
     return await _a.getCards(type)
 }
 
+const CardActions = ['PUSH', 'DISCARD'] as const
 type CardRuleType = 'user_id' | 'keyword'
-type CardRuleAct = 'PUSH' | 'DISCARD'
+type CardRuleAct = typeof CardActions[number]
 
 const CardRuleFnMap: RuleFnMap<CardRuleType> = {
     user_id: {
@@ -157,16 +158,17 @@ const CardRuleFnMap: RuleFnMap<CardRuleType> = {
 const cardFilter = (
     card: CardInfoParsed,
     rules: Rule<CardRuleAct, CardRuleType>[] = []
-): boolean => {
+): CardRuleAct => {
     const ruleEngine = new RuleEngine<CardRuleAct, CardRuleType>(
         CardRuleFnMap,
         'PUSH'
     )
+    ruleEngine.actions = [...CardActions] // this line will take no effects
     for (const r of rules) {
         ruleEngine.load(r)
     }
-    const { action } = ruleEngine.exec(card)
-    return action == 'PUSH' ? true : false
+    const res = ruleEngine.exec(card)
+    return res.action
 }
 
 const cardRulesTest = (
@@ -176,6 +178,7 @@ const cardRulesTest = (
         CardRuleFnMap,
         'PUSH'
     )
+    ruleEngine.actions = [...CardActions]
     const errs = []
     for (const r of rules) {
         ruleEngine.load(r, false, true).forEach((e) => {
@@ -376,38 +379,40 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
                 const caption = messageParser(card)
 
                 const rules = JSON.parse(userData.get(['rules']) || '[]')
-                if (Array.isArray(rules)) {
-                    if (!cardFilter(card, rules)) return
-                } else {
-                    //
-                }
 
-                if (card.cover_url.length == 0) {
-                    bot.api.sendMessage(inf.data.chat_id, caption, {
-                        parse_mode: 'MarkdownV2',
-                    })
-                }
-                if (card.cover_url.length == 1) {
-                    bot.api.sendPhoto(inf.data.chat_id, card.cover_url[0], {
-                        caption: caption,
-                        parse_mode: 'MarkdownV2',
-                    })
-                }
-                if (card.cover_url.length >= 2 && card.cover_url.length <= 10) {
-                    bot.api.sendMediaGroup(
-                        inf.data.chat_id,
-                        card.cover_url.map((url) => {
-                            return {
-                                type: 'photo',
-                                media: url,
-                                caption: caption,
-                                parse_mode: 'MarkdownV2',
-                            }
+                if (cardFilter(card, rules) == 'PUSH') {
+                    if (card.cover_url.length == 0) {
+                        bot.api.sendMessage(inf.data.chat_id, caption, {
+                            parse_mode: 'MarkdownV2',
                         })
-                    )
+                    }
+                    if (card.cover_url.length == 1) {
+                        bot.api.sendPhoto(inf.data.chat_id, card.cover_url[0], {
+                            caption: caption,
+                            parse_mode: 'MarkdownV2',
+                        })
+                    }
+                    if (
+                        card.cover_url.length >= 2 &&
+                        card.cover_url.length <= 10
+                    ) {
+                        bot.api.sendMediaGroup(
+                            inf.data.chat_id,
+                            card.cover_url.map((url) => {
+                                return {
+                                    type: 'photo',
+                                    media: url,
+                                    caption: caption,
+                                    parse_mode: 'MarkdownV2',
+                                }
+                            })
+                        )
+                    }
+                    await wait(1000)
+                } else if (ignoreTs) {
+                    // TODO: display discard message in 'resend' mode
                 }
                 i++
-                await wait(1000)
             }
         },
         OPT.interval,
@@ -640,7 +645,8 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
                 }
             }
             if (typeof errMsg == 'undefined') {
-                inf.data.user_data.set(msg.text, ['rules'])
+                const userData = inf.data.user_data
+                userData.set(msg.text, ['rules'])
                 bot.api.sendMessage(msg.chat.id, OPT.text.ruleUploadSuccess)
                 return true
             } else {
@@ -656,6 +662,9 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
             max_exec_counts: 1,
             pass_to_command: false,
             pass_to_other_action: false,
+        },
+        {
+            application_name: OPT.name,
         }
     )
     bot.command.add(
