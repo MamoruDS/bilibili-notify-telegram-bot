@@ -52,6 +52,10 @@ export const OPT = {
             str: 'bilibili_upload_rules',
             description: 'Upload notification filter rules (in JSON',
         },
+        download_rules: {
+            str: 'bilibili_download_rules',
+            description: 'Download user rules (in JSON',
+        },
     },
     messageActions: {
         updateSESSDATA: {
@@ -111,6 +115,7 @@ export const OPT = {
         ruleFormatErr: 'Bad format of uploaded rules',
         ruleUploadSuccess: 'Rules have been updated',
         ruleUploadFailed: 'Upload failed.\nRetry with the command /${_}',
+        ruleNotFound: 'No valid rules found',
     },
     _bilibiliSpace: 'https://space.bilibili.com/${_}',
     _bilibiliVideo: 'https://www.bilibili.com/video/${_}',
@@ -681,6 +686,33 @@ const bilibiliNotif = (bot: BotUtils, options: Optional<typeof OPT>) => {
         {
             filter: 'public',
             description: OPT.commands.upload_rules.description,
+        },
+        {
+            application_name: OPT.name,
+        }
+    )
+    bot.command.add(
+        OPT.commands.download_rules.str,
+        async (inf) => {
+            const msg = inf.message
+            let rules: object
+            try {
+                rules = JSON.parse(inf.data.user_data.get(['rules']))
+                bot.api.sendDocument(
+                    msg.from.id,
+                    Buffer.from(JSON.stringify(rules, null, 2)),
+                    {},
+                    {
+                        filename: `${msg.from.first_name}_rules.json`,
+                    }
+                )
+            } catch (e) {
+                bot.api.sendMessage(msg.from.id, OPT.text.ruleNotFound)
+            }
+        },
+        {
+            filter: 'public',
+            description: OPT.commands.download_rules.description,
         },
         {
             application_name: OPT.name,
